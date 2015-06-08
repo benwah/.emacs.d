@@ -1,6 +1,3 @@
-(setenv "PATH" (concat ".:~/.emacs.d/bin" (getenv "PATH")))
-(setq exec-path (append exec-path '(".:~/.emacs.d/bin")))
-
 ;; Global settings
 ;; ---------------
 (electric-pair-mode 1)              ; Automagically close parenthesis / brackets.
@@ -40,8 +37,19 @@
   (require 'use-package))
 
 
+;; Path
+;; ----
+(setenv "PATH" (concat ".:~/.emacs.d/bin" (getenv "PATH")))
+(setq exec-path (append exec-path '(".:~/.emacs.d/bin")))
+
 ;; Third-party global customizations:
 ;; ----------------------------------
+
+(if window-system
+    (use-package exec-path-from-shell
+      :init
+      (exec-path-from-shell-initialize)
+      ))
 
 (use-package powerline
   :ensure t
@@ -116,6 +124,41 @@
   (global-set-key (kbd "C-c p") 'flymake-goto-prev-error)
   )
 
+;; Figure this shit out:
+
+;; (use-package helm
+;;   :ensure t
+;;   :init
+;;   (require 'helm-config)
+;;   (helm-mode t)
+;;   ;; (helm-autoresize-mode 1)
+;;   ;; (setq helm-M-x-fuzzy-match t)
+;;   )
+
+;; (use-package ido
+;;   :init
+;;   (require 'ido)
+;;   (ido-mode t)
+;;   )
+
+;; (use-package flx-ido
+;;   :ensure t
+;;   :init
+;;     (require 'flx-ido)
+;;     (ido-mode 1)
+;;     (ido-everywhere 1)
+;;     (flx-ido-mode 1)
+;;     ;; disable ido faces to see flx highlights.
+;;     (setq ido-enable-flex-matching t)
+;;     (setq ido-use-faces nil)
+;;   )
+
+(use-package projectile
+  :ensure t
+  :init
+  (projectile-global-mode)
+  )
+
 ;; Python
 (use-package python-mode
   :init
@@ -171,7 +214,7 @@
 ;; Key bindings.
 ;; -------------
 (global-set-key (kbd "C-c r")
-                '(lambda () (interactive) (load-file "~/.emacs")))
+                '(lambda () (interactive) (load-file "~/.emacs.d/init.el")))
 (global-set-key (kbd "C-x +") 'text-scale-increase)
 (global-set-key (kbd "C-x =") 'text-scale-increase)
 (global-set-key (kbd "C-x -") 'text-scale-decrease)
