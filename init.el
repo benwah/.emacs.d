@@ -3,7 +3,7 @@
 (electric-pair-mode 1)              ; Automagically close parenthesis / brackets.
 (delete-selection-mode -1)          ; Deletes content of marked-text when typing.
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
-(setq show-paren-style 'expression) ; Highlight content of brackets.
+(setq show-paren-style -1)          ; Highlight content of brackets.
 (column-number-mode 1)              ; Display column number
 (setq make-backup-files -1)         ; stop creating backup~ files
 (setq auto-save-default -1)         ; stop creating #autosave# files
@@ -13,9 +13,20 @@
 (scroll-bar-mode -1)                ; No scrollbar
 (global-set-key "\M-w" 'clipboard-kill-ring-save) ; Play well with linux clipboard
 (global-set-key "\C-y" 'clipboard-yank)
+(setq x-select-enable-clipboard t)
 (if window-system
     (global-set-key "\C-z" nil))
-(setq-default show-trailing-whitespace t)
+(setq-default
+ show-trailing-whitespace t
+ )
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
 
 ;; Packaging
 ;; ---------
@@ -47,6 +58,7 @@
 
 (if window-system
     (use-package exec-path-from-shell
+      :ensure t
       :init
       (exec-path-from-shell-initialize)
       ))
@@ -101,6 +113,7 @@
   :init
   (add-to-list 'auto-mode-alist
                '("\\.scss\\'" . less-css-mode))
+  (setq scss-compile-at-save nil)
   )
 
 (use-package slim-mode
@@ -180,6 +193,7 @@
               (fci-mode t)
               (flymake-pyflakes-init)
               ))
+  (add-hook 'python-mode-hook 'auto-fill-mode 80)
   )
 
 ;; Coffeescript
@@ -199,22 +213,64 @@
   :ensure flycheck
   :ensure flymake-ruby
   :init
-  (setenv "PATH" (concat (getenv "PATH") ":~/.rbenv/shims"))
-  (setq ruby-insert-encoding-magic-comment nil)
-  (setq ruby-deep-indent-paren nil)
-  ;; (require 'flymake-ruby)
-  ;; (add-hook 'ruby-mode-hook 'rubocop-mode)
+  (setq
+   ruby-deep-indent-paren nil
+   ruby-indent-tabs-mode nil
+   ruby-insert-encoding-magic-comment nil
+   ruby-insert-encoding-magic-comment nil
+   ruby-deep-indent-paren nil
+   )
+  (eval-after-load "hideshow"
+    '(add-to-list 'hs-special-modes-alist
+		  `(ruby-mode
+		    ,(rx (or "do" "if" "def" "class" "module" "{" "[")) ; Block start
+		    ,(rx (or "}" "]" "end"))                            ; Block end
+		    ,(rx (or "#" "=begin"))                             ; Comment start
+		    ruby-forward-sexp nil)))
+  (add-to-list 'auto-mode-alist
+	       '("\\.\\(?:gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist
+	       '("\\(Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'" . ruby-mode))
   (add-hook 'ruby-mode-hook
            (lambda()
              (flycheck-mode)
+	     (hs-minor-mode)
+	     (set-fill-column 120)
              ))
   (add-hook 'ruby-mode-hook 'flymake-ruby-load)
   )
+
+;; SQL
+
+(defalias 'mysql-mode
+  (lambda()
+    (interactive)
+    (sql-mode)
+    (sql-highlight-mysql-keywords)
+    ))
+
+
+;; Utils
+;; -----
+(defun kill-other-buffers ()
+    "Kill all other buffers."
+    (interactive)
+    (mapc 'kill-buffer
+          (delq (current-buffer)
+                (remove-if-not 'buffer-file-name (buffer-list)))))
 
 ;; Key bindings.
 ;; -------------
 (global-set-key (kbd "C-c r")
                 '(lambda () (interactive) (load-file "~/.emacs.d/init.el")))
+(global-set-key [C-f12] (lambda() (interactive)(kill-other-buffers)))
 (global-set-key (kbd "C-x +") 'text-scale-increase)
 (global-set-key (kbd "C-x =") 'text-scale-increase)
 (global-set-key (kbd "C-x -") 'text-scale-decrease)
+(global-set-key (kbd "C-c S") 'hs-show-all)
+(global-set-key (kbd "C-c H") 'hs-hide-all)
+(global-set-key (kbd "C-c s") 'hs-show-block)
+(global-set-key (kbd "C-c h") 'hs-hide-block)
+
+
+(provide 'init)
