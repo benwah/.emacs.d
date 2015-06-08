@@ -69,18 +69,11 @@
   (powerline-default-theme)           ; Pretty bar at the bottom.
   )
 
-(use-package tabbar
-  :ensure t
-  :ensure tabbar-ruler
-  :init
-  (tabbar-mode)
-  (require 'cl)
-  (setq tabbar-ruler-global-tabbar t) ; If you want tabbar
-  (setq tabbar-ruler-global-ruler nil) ; if you want a global ruler
-  (require 'tabbar-ruler)
-  (tabbar-ruler-group-by-projectile-project)
-  (global-set-key (kbd "C-c t") 'tabbar-ruler-move)
-  )
+;; (use-package tabbar
+;;   :ensure t
+;;   :init
+;;   (tabbar-mode)
+;;   )
 
 (use-package fill-column-indicator
   :ensure t
