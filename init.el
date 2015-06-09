@@ -1,24 +1,39 @@
+;;; init.el -- Ben's init.el
+;;
+;; Free
+;;
+;;; Commentary:
+;;
+;; Nothing worth mentioning.
+
+;;; Code:
+
+
 ;; Global settings
 ;; ---------------
 (electric-pair-mode 1)              ; Automagically close parenthesis / brackets.
 (delete-selection-mode -1)          ; Deletes content of marked-text when typing.
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
-(setq show-paren-style -1)          ; Highlight content of brackets.
 (column-number-mode 1)              ; Display column number
-(setq make-backup-files -1)         ; stop creating backup~ files
-(setq auto-save-default -1)         ; stop creating #autosave# files
 (desktop-save-mode 1)               ; Save / restore opened files.
 (menu-bar-mode -1)                  ; No menu bar
 (tool-bar-mode -1)                  ; No toolbar
 (scroll-bar-mode -1)                ; No scrollbar
-(global-set-key "\M-w" 'clipboard-kill-ring-save) ; Play well with linux clipboard
-(global-set-key "\C-y" 'clipboard-yank)
 (setq x-select-enable-clipboard t)
-(if window-system
-    (global-set-key "\C-z" nil))
-(setq-default
- show-trailing-whitespace t
- )
+(setq make-backup-files -1)         ; stop creating backup~ files
+(setq auto-save-default -1)         ; stop creating #autosave# files
+(defvar show-paren-style -1)          ; Highlight content of brackets.
+(defvar whitespace-style (quote (face trailing empty tabs)))
+
+
+;; Load-path
+;; ---------
+(add-to-list 'load-path "~/.emacs.d/lib")
+(add-to-list 'load-path "~/.emacs.d/secret")
+
+
+;; "Custom" settings
+;; -----------------
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -35,7 +50,6 @@
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "https://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.org/packages/")))
-
 (setq package-enable-at-startup nil)
 (package-initialize)
 
@@ -53,11 +67,11 @@
 (setenv "PATH" (concat ".:~/.emacs.d/bin" (getenv "PATH")))
 (setq exec-path (append exec-path '(".:~/.emacs.d/bin")))
 
+
 ;; Third-party global customizations:
 ;; ----------------------------------
-
 (if window-system
-    (use-package exec-path-from-shell
+    (use-package "exec-path-from-shell"
       :ensure t
       :init
       (exec-path-from-shell-initialize)
@@ -69,24 +83,17 @@
   (powerline-default-theme)           ; Pretty bar at the bottom.
   )
 
-;; (use-package tabbar
-;;   :ensure t
-;;   :init
-;;   (tabbar-mode)
-;;   )
-
 (use-package fill-column-indicator
   :ensure t
   )
 
-
 ;; Theme:
 ;; ------
-(use-package color-theme
+
+(use-package monokai-theme
   :ensure t
   :init
-  (color-theme-initialize)
-  (color-theme-billw)
+  (load-theme 'monokai t)
   )
 
 (set-face-attribute 'default nil :height 100 :family "Inconsolata")
@@ -106,7 +113,7 @@
   :init
   (add-to-list 'auto-mode-alist
                '("\\.scss\\'" . less-css-mode))
-  (setq scss-compile-at-save nil)
+  (defvar scss-compile-at-save nil)
   )
 
 (use-package slim-mode
@@ -116,15 +123,18 @@
 (use-package rainbow-mode
   :ensure t
   :init
-  (add-hook 'css-mode-hook 'custom-css-mode-hook)
-  (defun custom-css-mode-hook ()
-    (rainbow-mode 1))
+  (add-hook 'css-mode-hook
+            (lambda()
+              (whitespace-mode)
+              (rainbow-mode 1)
+	      (set-fill-column 120)
+              (fci-mode t)
+            ))
   )
+
 
 (use-package flymake
   :init
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.py\\'" flymake-pyflakes-init))
   (global-set-key (kbd "C-;") 'flymake-display-err-menu-for-current-line)
   (global-set-key (kbd "C-c n") 'flymake-goto-next-error)
   (global-set-key (kbd "C-c p") 'flymake-goto-prev-error)
@@ -159,34 +169,58 @@
 ;;     (setq ido-use-faces nil)
 ;;   )
 
+(defvar magit-auto-revert-mode nil)
+(defvar magit-last-seen-setup-instructions "1.4.0")
+(use-package magit
+  :ensure t
+  :init
+  )
+
 (use-package projectile
   :ensure t
   :init
   (projectile-global-mode)
   )
 
+(use-package flycheck
+  :ensure t
+  )
+
+;; Emacs lisp
+(add-hook 'emacs-lisp-mode-hook
+          (lambda ()
+            (flymake-mode)
+            (flycheck-mode)
+            (whitespace-mode)
+            (set-fill-column 80)
+            (fci-mode t)
+            ))
+
 ;; Python
 (use-package python-mode
   :init
+  (add-to-list 'flymake-allowed-file-name-masks
+               '("\\.py\\'" flymake-pyflakes-init))
   (defun flymake-pyflakes-init ()
     (let* ((temp-file (flymake-init-create-temp-buffer-copy
                        'flymake-create-temp-inplace))
            (local-file (file-relative-name
                         temp-file
                         (file-name-directory buffer-file-name))))
-      (list "~/.emacs.d/pychecker.sh"  (list local-file))))
+      (list "~/.emacs.d/bin/pychecker.sh"  (list local-file))))
 
   (add-hook 'python-mode-hook
             (lambda ()
               (setq-default indent-tabs-mode nil)
               (setq tab-width 4)
-              (setq-default fill-column 79)
               (flymake-mode)
               (setq indent-region-function nil)
               (fci-mode t)
               (flymake-pyflakes-init)
+	      (whitespace-mode)
+              (setq-default fill-column 79)
+	      (auto-fill-mode 80)
               ))
-  (add-hook 'python-mode-hook 'auto-fill-mode 80)
   )
 
 ;; Coffeescript
@@ -197,8 +231,12 @@
   (add-to-list 'auto-mode-alist '("Cakefile" . coffee-mode))
   (custom-set-variables '(coffee-tab-width 2))
   (add-hook 'coffee-mode-hook
-            'flymake-coffee-load
-            )
+	    (lambda ()
+	      (whitespace-mode)
+	      (flymake-coffee-load)
+	      (set-fill-column 120)
+              (fci-mode t)
+	      ))
   )
 
 ;; Ruby
@@ -225,16 +263,17 @@
   (add-to-list 'auto-mode-alist
 	       '("\\(Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'" . ruby-mode))
   (add-hook 'ruby-mode-hook
-           (lambda()
-             (flycheck-mode)
-	     (hs-minor-mode)
-	     (set-fill-column 120)
-             ))
-  (add-hook 'ruby-mode-hook 'flymake-ruby-load)
+	    (lambda()
+	      (flycheck-mode)
+	      (flymake-ruby-load)
+	      (hs-minor-mode)
+	      (whitespace-mode)
+	      (set-fill-column 120)
+              (fci-mode t)
+	      ))
   )
 
 ;; SQL
-
 (defalias 'mysql-mode
   (lambda()
     (interactive)
@@ -252,11 +291,23 @@
           (delq (current-buffer)
                 (remove-if-not 'buffer-file-name (buffer-list)))))
 
+;; Hipchat
+(use-package jabber
+  :ensure t
+  :init
+  (require 'hipchat)
+  )
+
+
 ;; Key bindings.
 ;; -------------
+(if window-system
+    (global-set-key "\C-z" nil))
 (global-set-key (kbd "C-c r")
                 '(lambda () (interactive) (load-file "~/.emacs.d/init.el")))
 (global-set-key [C-f12] (lambda() (interactive)(kill-other-buffers)))
+(global-set-key (kbd "M-w")   'clipboard-kill-ring-save)
+(global-set-key (kbd "C-y")   'clipboard-yank)
 (global-set-key (kbd "C-x +") 'text-scale-increase)
 (global-set-key (kbd "C-x =") 'text-scale-increase)
 (global-set-key (kbd "C-x -") 'text-scale-decrease)
@@ -265,5 +316,5 @@
 (global-set-key (kbd "C-c s") 'hs-show-block)
 (global-set-key (kbd "C-c h") 'hs-hide-block)
 
-
 (provide 'init)
+;;; init.el ends here
