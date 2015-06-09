@@ -127,7 +127,7 @@
             (lambda()
               (whitespace-mode)
               (rainbow-mode 1)
-	      (set-fill-column 120)
+              (set-fill-column 120)
               (fci-mode t)
             ))
   )
@@ -217,9 +217,9 @@
               (setq indent-region-function nil)
               (fci-mode t)
               (flymake-pyflakes-init)
-	      (whitespace-mode)
+              (whitespace-mode)
               (setq-default fill-column 79)
-	      (auto-fill-mode 80)
+              (auto-fill-mode 80)
               ))
   )
 
@@ -231,12 +231,12 @@
   (add-to-list 'auto-mode-alist '("Cakefile" . coffee-mode))
   (custom-set-variables '(coffee-tab-width 2))
   (add-hook 'coffee-mode-hook
-	    (lambda ()
-	      (whitespace-mode)
-	      (flymake-coffee-load)
-	      (set-fill-column 120)
+            (lambda ()
+              (whitespace-mode)
+              (flymake-coffee-load)
+              (set-fill-column 120)
               (fci-mode t)
-	      ))
+              ))
   )
 
 ;; Ruby
@@ -253,24 +253,24 @@
    )
   (eval-after-load "hideshow"
     '(add-to-list 'hs-special-modes-alist
-		  `(ruby-mode
-		    ,(rx (or "do" "if" "def" "class" "module" "{" "[")) ; Block start
-		    ,(rx (or "}" "]" "end"))                            ; Block end
-		    ,(rx (or "#" "=begin"))                             ; Comment start
-		    ruby-forward-sexp nil)))
+                  `(ruby-mode
+                    ,(rx (or "do" "if" "def" "class" "module" "{" "[")) ; Block start
+                    ,(rx (or "}" "]" "end"))                            ; Block end
+                    ,(rx (or "#" "=begin"))                             ; Comment start
+                    ruby-forward-sexp nil)))
   (add-to-list 'auto-mode-alist
-	       '("\\.\\(?:gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'" . ruby-mode))
+               '("\\.\\(?:gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'" . ruby-mode))
   (add-to-list 'auto-mode-alist
-	       '("\\(Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'" . ruby-mode))
+               '("\\(Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'" . ruby-mode))
   (add-hook 'ruby-mode-hook
-	    (lambda()
-	      (flycheck-mode)
-	      (flymake-ruby-load)
-	      (hs-minor-mode)
-	      (whitespace-mode)
-	      (set-fill-column 120)
+            (lambda()
+              (flycheck-mode)
+              (flymake-ruby-load)
+              (hs-minor-mode)
+              (whitespace-mode)
+              (set-fill-column 120)
               (fci-mode t)
-	      ))
+              ))
   )
 
 ;; SQL
