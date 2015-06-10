@@ -318,3 +318,13 @@
 
 (provide 'init)
 ;;; init.el ends here
+
+
+;; Bug fix
+;; -------
+;; Stupid bug here: https://github.com/alpaker/Fill-Column-Indicator/issues/31
+(make-variable-buffer-local 'line-move-visual)
+(defadvice previous-line (around avoid-jumpy-fci activate)
+  (if (and (symbol-value 'fci-mode) (> (count-lines 1 (point)) 0))
+      (prog (fci-mode -1) ad-do-it (fci-mode 1))
+    ad-do-it))
