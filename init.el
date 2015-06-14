@@ -133,6 +133,12 @@
   )
 
 
+(use-package go-mode
+  :ensure t
+  :init
+  (require 'go-mode-autoloads)
+  )
+
 (use-package flymake
   :init
   (global-set-key (kbd "C-;") 'flymake-display-err-menu-for-current-line)
