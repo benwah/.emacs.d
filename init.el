@@ -11,7 +11,7 @@
 
 ;; Global settings
 ;; ---------------
-(electric-pair-mode 1)              ; Automagically close parenthesis / brackets.
+(electric-pair-mode -1)              ; Automagically close parenthesis / brackets.
 (delete-selection-mode -1)          ; Deletes content of marked-text when typing.
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
 (column-number-mode 1)              ; Display column number
