@@ -15,7 +15,7 @@
 (delete-selection-mode -1)          ; Deletes content of marked-text when typing.
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
 (column-number-mode 1)              ; Display column number
-(desktop-save-mode 1)               ; Save / restore opened files.
+(desktop-save-mode -1)               ; Save / restore opened files.
 (menu-bar-mode -1)                  ; No menu bar
 (tool-bar-mode -1)                  ; No toolbar
 (scroll-bar-mode -1)                ; No scrollbar
