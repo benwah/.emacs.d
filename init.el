@@ -90,10 +90,16 @@
 ;; Theme:
 ;; ------
 
-(use-package monokai-theme
+;; (use-package monokai-theme
+;;   :ensure t
+;;   :init
+;;   (load-theme 'monokai t)
+;;   )
+
+(use-package leuven-theme
   :ensure t
   :init
-  (load-theme 'monokai t)
+  (load-theme 'leuven t)
   )
 
 (set-face-attribute 'default nil :height 100 :family "Inconsolata")
@@ -321,6 +327,10 @@
 (global-set-key (kbd "C-c H") 'hs-hide-all)
 (global-set-key (kbd "C-c s") 'hs-show-block)
 (global-set-key (kbd "C-c h") 'hs-hide-block)
+(global-set-key (kbd "C-S-f")  'windmove-left)
+(global-set-key (kbd "C-S-b") 'windmove-right)
+(global-set-key (kbd "C-S-p")    'windmove-up)
+(global-set-key (kbd "C-S-n")  'windmove-down)
 
 (provide 'init)
 ;;; init.el ends here
