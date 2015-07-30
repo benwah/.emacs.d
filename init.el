@@ -90,16 +90,10 @@
 ;; Theme:
 ;; ------
 
-;; (use-package monokai-theme
-;;   :ensure t
-;;   :init
-;;   (load-theme 'monokai t)
-;;   )
-
-(use-package leuven-theme
+(use-package monokai-theme
   :ensure t
   :init
-  (load-theme 'leuven t)
+  (load-theme 'monokai t)
   )
 
 (set-face-attribute 'default nil :height 100 :family "Inconsolata")
