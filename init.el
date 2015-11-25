@@ -298,14 +298,6 @@
           (delq (current-buffer)
                 (remove-if-not 'buffer-file-name (buffer-list)))))
 
-;; Hipchat
-(use-package jabber
-  :ensure t
-  :init
-  (require 'hipchat)
-  )
-
-
 ;; Key bindings.
 ;; -------------
 (if window-system
