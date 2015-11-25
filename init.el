@@ -22,7 +22,8 @@
 (setq x-select-enable-clipboard t)
 (setq make-backup-files -1)         ; stop creating backup~ files
 (setq auto-save-default -1)         ; stop creating #autosave# files
-(defvar show-paren-style -1)          ; Highlight content of brackets.
+(setq require-final-newline t)      ; Force new line at EOF.
+(defvar show-paren-style -1)        ; Highlight content of brackets.
 (defvar whitespace-style (quote (face trailing empty tabs)))
 
 
@@ -338,3 +339,20 @@
   (if (and (symbol-value 'fci-mode) (> (count-lines 1 (point)) 0))
       (prog (fci-mode -1) ad-do-it (fci-mode 1))
     ad-do-it))
+
+
+;; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
+(defun rename-file-and-buffer (new-name)
+  "Renames both current buffer and file it's visiting to NEW-NAME."
+  (interactive "sNew name: ")
+  (let ((name (buffer-name))
+        (filename (buffer-file-name)))
+    (if (not filename)
+        (message "Buffer '%s' is not visiting a file!" name)
+      (if (get-buffer new-name)
+          (message "A buffer named '%s' already exists!" new-name)
+        (progn
+          (rename-file name new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil))))))
