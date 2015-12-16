@@ -78,12 +78,6 @@
       (exec-path-from-shell-initialize)
       ))
 
-(use-package powerline
-  :ensure t
-  :init
-  (powerline-default-theme)           ; Pretty bar at the bottom.
-  )
-
 (use-package fill-column-indicator
   :ensure t
   )
