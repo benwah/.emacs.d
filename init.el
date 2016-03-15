@@ -103,6 +103,17 @@
                '("\\.less\\'" . less-css-mode))
   )
 
+(use-package web-mode
+  :ensure t
+  :init
+  (add-to-list 'auto-mode-alist
+               '("\\.html\\'" . web-mode))
+  (add-to-list 'auto-mode-alist
+               '("\\.js\\'" . web-mode))
+  (add-to-list 'auto-mode-alist
+               '("\\.liquid\\'" . web-mode))
+  )
+
 (use-package scss-mode
   :ensure t
   :init
