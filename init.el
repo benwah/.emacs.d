@@ -11,6 +11,7 @@
 
 ;; Global settings
 ;; ---------------
+(set-keyboard-coding-system nil)
 (electric-pair-mode -1)              ; Automagically close parenthesis / brackets.
 (delete-selection-mode -1)          ; Deletes content of marked-text when typing.
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
@@ -331,11 +332,11 @@
 ;; Bug fix
 ;; -------
 ;; Stupid bug here: https://github.com/alpaker/Fill-Column-Indicator/issues/31
-(make-variable-buffer-local 'line-move-visual)
-(defadvice previous-line (around avoid-jumpy-fci activate)
-  (if (and (symbol-value 'fci-mode) (> (count-lines 1 (point)) 0))
-      (prog (fci-mode -1) ad-do-it (fci-mode 1))
-    ad-do-it))
+;; (make-variable-buffer-local 'line-move-visual)
+;; (defadvice previous-line (around avoid-jumpy-fci activate)
+;;   (if (and (symbol-value 'fci-mode) (> (count-lines 1 (point)) 0))
+;;       (prog (fci-mode -1) ad-do-it (fci-mode 1))
+;;     ad-do-it))
 
 
 ;; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
