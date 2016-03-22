@@ -97,6 +97,10 @@
 
 ;; Modes:
 ;; ------
+(use-package yaml-mode
+  :ensure t
+  )
+
 (use-package less-css-mode
   :ensure t
   :init
