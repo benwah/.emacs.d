@@ -344,9 +344,6 @@
 (global-set-key [C-f12] (lambda() (interactive)(kill-other-buffers)))
 (global-set-key (kbd "M-w")   'clipboard-kill-ring-save)
 (global-set-key (kbd "C-y")   'clipboard-yank)
-(global-set-key (kbd "C-x +") 'text-scale-increase)
-(global-set-key (kbd "C-x =") 'text-scale-increase)
-(global-set-key (kbd "C-x -") 'text-scale-decrease)
 (global-set-key (kbd "C-c S") 'hs-show-all)
 (global-set-key (kbd "C-c H") 'hs-hide-all)
 (global-set-key (kbd "C-c s") 'hs-show-block)
@@ -382,6 +379,28 @@
           (rename-buffer new-name)
           (set-visited-file-name new-name)
           (set-buffer-modified-p nil))))))
+
+(defun startup-layout ()
+  (interactive)
+  (delete-other-windows)
+  (dotimes (number 2)
+    (split-window-horizontally)
+    )
+  (next-multiframe-window)
+  (dired "~")
+  (next-multiframe-window)
+  (dotimes (number 2)
+    (split-window-vertically)
+    )
+  (balance-windows)
+
+  (dotimes (number 3)
+    (multi-term)
+    (next-multiframe-window)
+    )
+  )
+(startup-layout)
+
 
 (provide 'init)
 ;;; init.el ends here
