@@ -23,7 +23,7 @@
 (setq x-select-enable-clipboard t)
 (setq make-backup-files -1)         ; stop creating backup~ files
 (setq auto-save-default -1)         ; stop creating #autosave# files
-(setq require-final-newline t)      ; Force new line at EOF.
+(setq require-final-newline nil)    ; Forceload- new line at EOF.
 (defvar show-paren-style -1)        ; Highlight content of brackets.
 (defvar whitespace-style (quote (face trailing empty tabs)))
 
@@ -290,6 +290,17 @@
               ))
   )
 
+;; Terminal
+
+(use-package multi-term
+  :ensure t
+  :init
+  (require 'multi-term)
+  (setq multi-term-program "/bin/bash")
+  (global-set-key (kbd "C-c t") 'multi-term)
+ )
+
+
 ;; SQL
 (defalias 'mysql-mode
   (lambda()
@@ -324,14 +335,11 @@
 (global-set-key (kbd "C-c H") 'hs-hide-all)
 (global-set-key (kbd "C-c s") 'hs-show-block)
 (global-set-key (kbd "C-c h") 'hs-hide-block)
-(global-set-key (kbd "C-S-f")  'windmove-left)
-(global-set-key (kbd "C-S-b") 'windmove-right)
-(global-set-key (kbd "C-S-p")    'windmove-up)
-(global-set-key (kbd "C-S-n")  'windmove-down)
 
-(provide 'init)
-;;; init.el ends here
-
+(global-set-key (kbd "C-M-h") 'windmove-left)
+(global-set-key (kbd "C-M-l") 'windmove-right)
+(global-set-key (kbd "C-M-k") 'windmove-up)
+(global-set-key (kbd "C-M-j") 'windmove-down)
 
 ;; Bug fix
 ;; -------
@@ -358,3 +366,6 @@
           (rename-buffer new-name)
           (set-visited-file-name new-name)
           (set-buffer-modified-p nil))))))
+
+(provide 'init)
+;;; init.el ends here
