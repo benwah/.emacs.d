@@ -306,6 +306,56 @@
               ))
   )
 
+(use-package minitest
+  :ensure t
+  :init
+  (require 'minitest)
+  )
+
+(custom-set-variables
+ '(minitest-default-command '("dev" "test"))
+ '(minitest-use-bundler nil)
+)
+
+(defun minitest-test-command ()
+  "Override."
+  minitest-default-command
+  )
+
+(defun minitest-project-root ()
+  "Override, use projectile to get project root."
+  (or (projectile-project-root) (error "You're not into a project")))
+
+(defun minitest--run-command (command &optional file-name)
+  "Thing"
+  (let ((compilation-scroll-output t)
+        (actual-command (concat
+                         (format "source ~/.bash_profile && cd %s && " (minitest-project-root))
+                         (or minitest-default-env "")
+                         " "
+                         command))
+        )
+    (setq minitest--last-command (list command file-name))
+    (compilation-start
+     (format "bash -c \"%s\"" actual-command)
+     'minitest-compilation-mode
+     (lambda (arg) (minitest-buffer-name (or file-name ""))))))
+
+
+ (defun minitest--test-name-flag (test-name)
+  "Override default minitest test-name-flag function.  TEST-NAME is the name of the test as understood by minitest."
+  (let ((flag (format "-n%s" test-name)))
+    (cond (minitest-use-spring (concat "TESTOPTS=" flag))
+          (t flag))))
+
+(defun minitest--file-command (&optional post-command)
+  "Run command on currently visited file.  POST-COMMAND are optional arguments."
+  (let ((file-name (file-relative-name (buffer-file-name) (minitest-project-root))))
+    (if file-name
+        (minitest-run-file file-name post-command)
+      (error "Buffer is not visiting a file"))))
+
+
 ;; Terminal
 
 (use-package multi-term
