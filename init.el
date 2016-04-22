@@ -18,14 +18,15 @@
 (column-number-mode 1)              ; Display column number
 (desktop-save-mode -1)               ; Save / restore opened files.
 (menu-bar-mode -1)                  ; No menu bar
-(tool-bar-mode -1)                  ; No toolbar
-(scroll-bar-mode -1)                ; No scrollbar
+;; (tool-bar-mode -1)                  ; No toolbar
+;; (scroll-bar-mode -1)                ; No scrollbar
 (setq x-select-enable-clipboard t)
 (setq make-backup-files -1)         ; stop creating backup~ files
 (setq auto-save-default -1)         ; stop creating #autosave# files
 (setq require-final-newline nil)    ; Forceload- new line at EOF.
 (defvar show-paren-style -1)        ; Highlight content of brackets.
 (defvar whitespace-style (quote (face trailing empty tabs)))
+(setq-default indent-tabs-mode nil)
 
 
 ;; Load-path
@@ -42,7 +43,10 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(coffee-tab-width 2)
+ '(package-selected-packages
+   (quote
+    (web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
 
 
 ;; Packaging
@@ -117,6 +121,9 @@
                '("\\.js\\'" . web-mode))
   (add-to-list 'auto-mode-alist
                '("\\.liquid\\'" . web-mode))
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (setq-default indent-tabs-mode nil)))
   )
 
 (use-package scss-mode
@@ -281,6 +288,7 @@
                '("\\(Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'" . ruby-mode))
   (add-hook 'ruby-mode-hook
             (lambda()
+              (setq-default indent-tabs-mode nil)
               (flycheck-mode)
               (flymake-ruby-load)
               (hs-minor-mode)
@@ -369,3 +377,10 @@
 
 (provide 'init)
 ;;; init.el ends here
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
