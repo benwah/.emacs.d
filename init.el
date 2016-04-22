@@ -27,7 +27,8 @@
 (defvar show-paren-style -1)        ; Highlight content of brackets.
 (defvar whitespace-style (quote (face trailing empty tabs)))
 (setq-default indent-tabs-mode nil)
-
+(global-hl-line-mode 1)
+(set-face-background hl-line-face "gray20")
 
 ;; Load-path
 ;; ---------
@@ -94,6 +95,13 @@
   :ensure t
   :init
   (load-theme 'monokai t)
+  )
+
+(use-package smart-cursor-color
+  :ensure t
+  :init
+  (require 'smart-cursor-color)
+  (smart-cursor-color-mode +1)
   )
 
 (set-face-attribute 'default nil :height 100 :family "Inconsolata")
