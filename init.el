@@ -81,12 +81,10 @@
     (use-package "exec-path-from-shell"
       :ensure t
       :init
-      (exec-path-from-shell-initialize)
-      ))
+      (exec-path-from-shell-initialize)))
 
 (use-package fill-column-indicator
-  :ensure t
-  )
+  :ensure t)
 
 ;; Theme:
 ;; ------
@@ -94,15 +92,13 @@
 (use-package monokai-theme
   :ensure t
   :init
-  (load-theme 'monokai t)
-  )
+  (load-theme 'monokai t))
 
 (use-package smart-cursor-color
   :ensure t
   :init
   (require 'smart-cursor-color)
-  (smart-cursor-color-mode +1)
-  )
+  (smart-cursor-color-mode +1))
 
 (set-face-attribute 'default nil :height 100 :family "Inconsolata")
 
@@ -110,15 +106,13 @@
 ;; Modes:
 ;; ------
 (use-package yaml-mode
-  :ensure t
-  )
+  :ensure t)
 
 (use-package less-css-mode
   :ensure t
   :init
   (add-to-list 'auto-mode-alist
-               '("\\.less\\'" . less-css-mode))
-  )
+               '("\\.less\\'" . less-css-mode)))
 
 (use-package web-mode
   :ensure t
@@ -131,20 +125,17 @@
                '("\\.liquid\\'" . web-mode))
   (add-hook 'web-mode-hook
             (lambda ()
-              (setq-default indent-tabs-mode nil)))
-  )
+              (setq-default indent-tabs-mode nil))))
 
 (use-package scss-mode
   :ensure t
   :init
   (add-to-list 'auto-mode-alist
                '("\\.scss\\'" . less-css-mode))
-  (defvar scss-compile-at-save nil)
-  )
+  (defvar scss-compile-at-save nil))
 
 (use-package slim-mode
-  :ensure t
-  )
+  :ensure t)
 
 (use-package rainbow-mode
   :ensure t
@@ -154,23 +145,18 @@
               (whitespace-mode)
               (rainbow-mode 1)
               (set-fill-column 120)
-              (fci-mode t)
-            ))
-  )
-
+              (fci-mode t))))
 
 (use-package go-mode
   :ensure t
   :init
-  (require 'go-mode-autoloads)
-  )
+  (require 'go-mode-autoloads))
 
 (use-package flymake
   :init
   (global-set-key (kbd "C-;") 'flymake-display-err-menu-for-current-line)
   (global-set-key (kbd "C-c n") 'flymake-goto-next-error)
-  (global-set-key (kbd "C-c p") 'flymake-goto-prev-error)
-  )
+  (global-set-key (kbd "C-c p") 'flymake-goto-prev-error))
 
 ;; Figure this shit out:
 
@@ -205,18 +191,15 @@
 (defvar magit-last-seen-setup-instructions "1.4.0")
 (use-package magit
   :ensure t
-  :init
-  )
+  :init)
 
 (use-package projectile
   :ensure t
   :init
-  (projectile-global-mode)
-  )
+  (projectile-global-mode))
 
 (use-package flycheck
-  :ensure t
-  )
+  :ensure t)
 
 ;; Emacs lisp
 (add-hook 'emacs-lisp-mode-hook
@@ -225,8 +208,7 @@
             (flycheck-mode)
             (whitespace-mode)
             (set-fill-column 80)
-            (fci-mode t)
-            ))
+            (fci-mode t)))
 
 ;; Python
 (use-package python-mode
@@ -252,8 +234,7 @@
               (whitespace-mode)
               (setq-default fill-column 79)
               (auto-fill-mode 80)
-              ))
-  )
+              )))
 
 ;; Coffeescript
 (use-package coffee-mode
@@ -268,8 +249,7 @@
               (flymake-coffee-load)
               (set-fill-column 120)
               (fci-mode t)
-              ))
-  )
+              )))
 
 ;; Ruby
 (use-package ruby-mode
@@ -281,8 +261,7 @@
    ruby-indent-tabs-mode nil
    ruby-insert-encoding-magic-comment nil
    ruby-insert-encoding-magic-comment nil
-   ruby-deep-indent-paren nil
-   )
+   ruby-deep-indent-paren nil)
   (eval-after-load "hideshow"
     '(add-to-list 'hs-special-modes-alist
                   `(ruby-mode
@@ -303,31 +282,35 @@
               (whitespace-mode)
               (set-fill-column 120)
               (fci-mode t)
-              ))
-  )
+              )))
 
 (use-package minitest
   :ensure t
   :init
-  (require 'minitest)
-  )
+  (require 'minitest))
 
 (custom-set-variables
  '(minitest-default-command '("dev" "test"))
- '(minitest-use-bundler nil)
-)
+ '(minitest-use-bundler nil))
+
+(define-derived-mode minitest-compilation-mode comint-mode ""
+  "Override."
+  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+
+(defun colorize-compilation-buffer ()
+  "Override."
+  (ansi-color-apply-on-region (point-min) (point-max)))
 
 (defun minitest-test-command ()
   "Override."
-  minitest-default-command
-  )
+  minitest-default-command)
 
 (defun minitest-project-root ()
   "Override, use projectile to get project root."
   (or (projectile-project-root) (error "You're not into a project")))
 
 (defun minitest--run-command (command &optional file-name)
-  "Thing"
+  "Override."
   (let ((compilation-scroll-output t)
         (actual-command (concat
                          (format "source ~/.bash_profile && cd %s && " (minitest-project-root))
@@ -337,12 +320,11 @@
         )
     (setq minitest--last-command (list command file-name))
     (compilation-start
-     (format "bash -c \"%s\"" actual-command)
+     actual-command
      'minitest-compilation-mode
      (lambda (arg) (minitest-buffer-name (or file-name ""))))))
 
-
- (defun minitest--test-name-flag (test-name)
+(defun minitest--test-name-flag (test-name)
   "Override default minitest test-name-flag function.  TEST-NAME is the name of the test as understood by minitest."
   (let ((flag (format "-n%s" test-name)))
     (cond (minitest-use-spring (concat "TESTOPTS=" flag))
@@ -355,35 +337,29 @@
         (minitest-run-file file-name post-command)
       (error "Buffer is not visiting a file"))))
 
-
 ;; Terminal
-
 (use-package multi-term
   :ensure t
   :init
   (require 'multi-term)
   (setq multi-term-program "/bin/bash")
-  (global-set-key (kbd "C-c t") 'multi-term)
- )
-
+  (global-set-key (kbd "C-c t") 'multi-term))
 
 ;; SQL
 (defalias 'mysql-mode
   (lambda()
     (interactive)
     (sql-mode)
-    (sql-highlight-mysql-keywords)
-    ))
-
+    (sql-highlight-mysql-keywords)))
 
 ;; Utils
 ;; -----
 (defun kill-other-buffers ()
-    "Kill all other buffers."
-    (interactive)
-    (mapc 'kill-buffer
-          (delq (current-buffer)
-                (remove-if-not 'buffer-file-name (buffer-list)))))
+  "Kill all other buffers."
+  (interactive)
+  (mapc 'kill-buffer
+        (delq (current-buffer)
+              (remove-if-not 'buffer-file-name (buffer-list)))))
 
 ;; Key bindings.
 ;; -------------
