@@ -18,8 +18,8 @@
 (column-number-mode 1)              ; Display column number
 (desktop-save-mode -1)               ; Save / restore opened files.
 (menu-bar-mode -1)                  ; No menu bar
-;; (tool-bar-mode -1)                  ; No toolbar
-;; (scroll-bar-mode -1)                ; No scrollbar
+(tool-bar-mode -1)                  ; No toolbar
+(scroll-bar-mode -1)                ; No scrollbar
 (setq x-select-enable-clipboard t)
 (setq make-backup-files -1)         ; stop creating backup~ files
 (setq auto-save-default -1)         ; stop creating #autosave# files
@@ -88,7 +88,6 @@
 
 ;; Theme:
 ;; ------
-
 (use-package monokai-theme
   :ensure t
   :init
@@ -100,8 +99,7 @@
   (require 'smart-cursor-color)
   (smart-cursor-color-mode +1))
 
-(set-face-attribute 'default nil :height 100 :family "Inconsolata")
-
+(set-face-attribute 'default nil :height 140 :family "Inconsolata")
 
 ;; Modes:
 ;; ------
@@ -301,6 +299,30 @@
   "Override."
   (ansi-color-apply-on-region (point-min) (point-max)))
 
+(defun minitest--extract-str ()
+  (save-excursion
+    (save-restriction
+      (widen)
+      (end-of-line)
+      (or (re-search-backward "\\(test[_A-Za-z0-9]*\\) ['\"]\\([^\"]+?\\)['\"]" nil t)
+          (re-search-backward "def \\(test\\)_\\([_A-Za-z0-9]+\\)" nil t)
+          (re-search-backward "\\(it\\) '\\([^\"]+?\\)'" nil t)
+          (re-search-backward "\\(it\\) \"\\([^\"]+?\\)\"" nil t)))))
+
+(defun minitest-verify-single ()
+  "Run on current file."
+  (interactive)
+  (if (minitest--extract-str)
+      (let* ((cmd (match-string 1))
+             (str (match-string 2))
+             (post_command
+              (cond
+               ((equal "test" cmd) (format "test_%s" (replace-regexp-in-string " " "_" str)))
+               ((equal "test_each_cart_type" cmd) (format "test_%s" (replace-regexp-in-string " " "_" str)))
+               ((equal "it" cmd) str))))
+        (minitest--file-command (minitest--test-name-flag post_command)))
+        (error "No test found. Make sure you are on a file that has `def test_foo` or `test \"foo\"`")))
+
 (defun minitest-test-command ()
   "Override."
   minitest-default-command)
@@ -324,12 +346,6 @@
      'minitest-compilation-mode
      (lambda (arg) (minitest-buffer-name (or file-name ""))))))
 
-(defun minitest--test-name-flag (test-name)
-  "Override default minitest test-name-flag function.  TEST-NAME is the name of the test as understood by minitest."
-  (let ((flag (format "-n%s" test-name)))
-    (cond (minitest-use-spring (concat "TESTOPTS=" flag))
-          (t flag))))
-
 (defun minitest--file-command (&optional post-command)
   "Run command on currently visited file.  POST-COMMAND are optional arguments."
   (let ((file-name (file-relative-name (buffer-file-name) (minitest-project-root))))
@@ -344,6 +360,9 @@
   (require 'multi-term)
   (setq multi-term-program "/bin/bash")
   (global-set-key (kbd "C-c t") 'multi-term))
+
+(add-to-list 'term-bind-key-alist
+             '("M-<backspace>" . term-send-backward-kill-word))
 
 ;; SQL
 (defalias 'mysql-mode
@@ -380,6 +399,14 @@
 (global-set-key (kbd "C-M-k") 'windmove-up)
 (global-set-key (kbd "C-M-j") 'windmove-down)
 
+;; Override comint mode key binginds
+(add-hook 'comint-mode-hook
+          (function (lambda () 
+                      (local-set-key (kbd "C-M-h") 'windmove-left)
+                      (local-set-key (kbd "C-M-l") 'windmove-right)
+                      (local-set-key (kbd "C-M-k") 'windmove-up)
+                      (local-set-key (kbd "C-M-j") 'windmove-down))))
+
 ;; Bug fix
 ;; -------
 ;; Stupid bug here: https://github.com/alpaker/Fill-Column-Indicator/issues/31
@@ -415,16 +442,12 @@
   (next-multiframe-window)
   (dired "~")
   (next-multiframe-window)
-  (dotimes (number 2)
-    (split-window-vertically)
-    )
   (balance-windows)
-
-  (dotimes (number 3)
-    (multi-term)
-    (next-multiframe-window)
-    )
+  (multi-term)
+  (next-multiframe-window)
+  (setq has-init t)
   )
+
 (startup-layout)
 
 
