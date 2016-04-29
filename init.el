@@ -11,6 +11,7 @@
 
 ;; Global settings
 ;; ---------------
+(setenv "PATH" (shell-command-to-string "source ~/.bash_profile; echo -n $PATH"))
 (set-keyboard-coding-system nil)
 (electric-pair-mode -1)              ; Automagically close parenthesis / brackets.
 (delete-selection-mode -1)          ; Deletes content of marked-text when typing.
@@ -189,7 +190,10 @@
 (defvar magit-last-seen-setup-instructions "1.4.0")
 (use-package magit
   :ensure t
-  :init)
+  :init
+  (global-set-key (kbd "C-x g") 'magit-status)
+  (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
+  )
 
 (use-package projectile
   :ensure t
@@ -255,7 +259,6 @@
   :ensure flymake-ruby
   :init
   (setq
-   ruby-deep-indent-paren nil
    ruby-indent-tabs-mode nil
    ruby-insert-encoding-magic-comment nil
    ruby-insert-encoding-magic-comment nil
@@ -279,8 +282,7 @@
               (hs-minor-mode)
               (whitespace-mode)
               (set-fill-column 120)
-              (fci-mode t)
-              )))
+              (fci-mode t))))
 
 (use-package minitest
   :ensure t
@@ -432,24 +434,6 @@
           (rename-buffer new-name)
           (set-visited-file-name new-name)
           (set-buffer-modified-p nil))))))
-
-(defun startup-layout ()
-  (interactive)
-  (delete-other-windows)
-  (dotimes (number 2)
-    (split-window-horizontally)
-    )
-  (next-multiframe-window)
-  (dired "~")
-  (next-multiframe-window)
-  (balance-windows)
-  (multi-term)
-  (next-multiframe-window)
-  (setq has-init t)
-  )
-
-(startup-layout)
-
 
 (provide 'init)
 ;;; init.el ends here
