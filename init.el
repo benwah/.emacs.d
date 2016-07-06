@@ -12,7 +12,6 @@
 ;; Global settings
 ;; ---------------
 (setenv "PATH" (shell-command-to-string "source ~/.bash_profile; echo -n $PATH"))
-(set-keyboard-coding-system nil)
 (electric-pair-mode -1)              ; Automagically close parenthesis / brackets.
 (delete-selection-mode -1)          ; Deletes content of marked-text when typing.
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
