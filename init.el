@@ -107,6 +107,9 @@
 (use-package yaml-mode
   :ensure t)
 
+(use-package markdown-mode
+  :ensure t)
+
 (use-package less-css-mode
   :ensure t
   :init
@@ -185,6 +188,12 @@
 ;;     (setq ido-enable-flex-matching t)
 ;;     (setq ido-use-faces nil)
 ;;   )
+
+(use-package osx-clipboard
+  :ensure t
+  :init
+  (osx-clipboard-mode +1)
+  )
 
 (defvar magit-auto-revert-mode nil)
 (defvar magit-last-seen-setup-instructions "1.4.0")
@@ -270,6 +279,7 @@
                     ,(rx (or "}" "]" "end"))                            ; Block end
                     ,(rx (or "#" "=begin"))                             ; Comment start
                     ruby-forward-sexp nil)))
+  (setq flycheck-checker-error-threshold 800)
   (add-to-list 'auto-mode-alist
                '("\\.\\(?:gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'" . ruby-mode))
   (add-to-list 'auto-mode-alist
