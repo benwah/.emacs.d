@@ -262,9 +262,26 @@
               )))
 
 ;; Ruby
+(defun inf-ruby-console-dev (dir)
+  "Run dev console"
+  (interactive "D")
+  (let ((default-directory (file-name-as-directory dir)))
+    (unless (file-exists-p "dev.yml")
+      (error "The directory must contain a dev.yml"))
+    (run-ruby "bash -c \"source ~/.bash_profile && dev console\"")))
+
+(defvar inf-ruby-console-patterns-alist
+  '(
+    ("dev.yml" . dev)
+    (inf-ruby-console-rails-p . rails)
+    ("*.gemspec" . gem)
+    (inf-ruby-console-racksh-p . racksh)
+    ("Gemfile" . default)))
+
 (use-package ruby-mode
   :ensure flycheck
   :ensure flymake-ruby
+  :ensure robe
   :init
   (setq
    ruby-indent-tabs-mode nil
@@ -291,7 +308,8 @@
               (hs-minor-mode)
               (whitespace-mode)
               (set-fill-column 120)
-              (fci-mode t))))
+              (fci-mode t)
+              (robe-mode))))
 
 (use-package minitest
   :ensure t
