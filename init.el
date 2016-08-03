@@ -208,6 +208,12 @@
   :init
   (projectile-global-mode))
 
+(use-package helm-projectile
+  :ensure t
+  :init
+  (setq projectile-completion-system 'helm)
+  (helm-projectile-on))
+
 (use-package flycheck
   :ensure t)
 
@@ -260,6 +266,18 @@
               (set-fill-column 120)
               (fci-mode t)
               )))
+
+;; Multi-cursor
+;; TODO: Make C-S work and test this shit.
+;; (use-package multiple-cursors
+;;   :ensure t
+;;   :init
+;;   (require 'multiple-cursors)
+;;   (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+;;   (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+;;   (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+;;   (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+;;   )
 
 ;; Ruby
 (defun inf-ruby-console-dev (dir)
@@ -333,10 +351,16 @@
     (save-restriction
       (widen)
       (end-of-line)
-      (or (re-search-backward "\\(test[_A-Za-z0-9]*\\) ['\"]\\([^\"]+?\\)['\"]" nil t)
+      (or (re-search-backward "\\(test[_A-Za-z0-9]*\\) '\\(.+\\)' do" nil t)
+          (re-search-backward "\\(test[_A-Za-z0-9]*\\) \"\\(.+\\)\" do" nil t)
           (re-search-backward "def \\(test\\)_\\([_A-Za-z0-9]+\\)" nil t)
           (re-search-backward "\\(it\\) '\\([^\"]+?\\)'" nil t)
           (re-search-backward "\\(it\\) \"\\([^\"]+?\\)\"" nil t)))))
+
+(defun minitest--test-name-flag (test-name)
+  (let ((flag (format "-n%s" test-name)))
+    (cond (minitest-use-spring (concat "TESTOPTS=" flag))
+          (t flag))))
 
 (defun minitest-verify-single ()
   "Run on current file."
@@ -387,8 +411,9 @@
   :ensure t
   :init
   (require 'multi-term)
-  (setq multi-term-program "/bin/bash")
-  (global-set-key (kbd "C-c t") 'multi-term))
+  (setq multi-term-program "/bin/bash"))
+
+(global-set-key (kbd "C-c t") 'shell)
 
 (add-to-list 'term-bind-key-alist
              '("M-<backspace>" . term-send-backward-kill-word))
@@ -436,17 +461,21 @@
   ;; (provide 'github-projects)
   ;; ;;; github-projects.el ends here
 
-  ;; This would define 6 shortcuts:
+  ;; This would define 8 shortcuts:
   ;; C-c g p o: Open my pull requests for my-project1
   ;; C-c g b o: Open my branches for my-project1
   ;; C-c g i o: Open my issues for my-project1
+  ;; C-c g m o: Open master branch for my-project1
   ;; C-c g p t: Open my pull requests for my-project2
   ;; C-c g b t: Open my branches for my-project2
-  ;; C-c g i t: Open my issues for my-project2
+  ;; C-c g m t: Open master branch for my-project2
 
   (defun gh-open-path (organization project path)
     (browse-url
      (format "https://github.com/%s/%s/%s" organization project path)))
+
+  (defun gh-open-master (gh-organization gh-project)
+    (gh-open-path gh-organization gh-project ""))
 
   (defun gh-open-branches (gh-organization gh-project)
     (gh-open-path gh-organization gh-project "branches/yours"))
@@ -474,7 +503,8 @@
 
               (global-set-key (kbd (format "C-c g p %s" shortcut)) `(lambda () (interactive) (gh-open-prs ',organization ',project ',username)))
               (global-set-key (kbd (format "C-c g b %s" shortcut)) `(lambda () (interactive) (gh-open-branches ',organization ',project)))
-              (global-set-key (kbd (format "C-c g i %s" shortcut)) `(lambda () (interactive) (gh-open-assigned-issues ',organization ',project ',username)))))))))
+              (global-set-key (kbd (format "C-c g i %s" shortcut)) `(lambda () (interactive) (gh-open-assigned-issues ',organization ',project ',username)))
+              (global-set-key (kbd (format "C-c g m %s" shortcut)) `(lambda () (interactive) (gh-open-master ',organization ',project)))))))))
 (gh-projects-init)
 
 ;; Key bindings.
