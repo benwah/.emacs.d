@@ -351,8 +351,7 @@
     (save-restriction
       (widen)
       (end-of-line)
-      (or (re-search-backward "\\(test[_A-Za-z0-9]*\\) '\\(.+\\)' do" nil t)
-          (re-search-backward "\\(test[_A-Za-z0-9]*\\) \"\\(.+\\)\" do" nil t)
+      (or (re-search-backward "\\(test[_A-Za-z0-9]*\\) ['\"]\\(.+\\)['\"] do" nil t)
           (re-search-backward "def \\(test\\)_\\([_A-Za-z0-9]+\\)" nil t)
           (re-search-backward "\\(it\\) '\\([^\"]+?\\)'" nil t)
           (re-search-backward "\\(it\\) \"\\([^\"]+?\\)\"" nil t)))))
@@ -569,3 +568,11 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+
+(defun toggle-fullscreen ()
+  "Toggle full screen"
+  (interactive)
+  (set-frame-parameter
+     nil 'fullscreen
+     (when (not (frame-parameter nil 'fullscreen)) 'fullboth)))
