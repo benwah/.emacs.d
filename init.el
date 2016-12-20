@@ -45,9 +45,11 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
+ '(minitest-default-command (quote ("dev" "test")))
+ '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
+    (eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
 
 
 ;; Packaging
@@ -334,9 +336,7 @@
   :init
   (require 'minitest))
 
-(custom-set-variables
- '(minitest-default-command '("dev" "test"))
- '(minitest-use-bundler nil))
+
 
 (define-derived-mode minitest-compilation-mode comint-mode ""
   "Override."
@@ -581,3 +581,15 @@
 (setq ediff-window-setup-function 'ediff-setup-windows-plain)
 (setq ediff-split-window-function 'split-window-horizontally)
 (setq reb-re-syntax 'string)
+(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+(add-hook 'eshell-preoutput-filter-functions
+          'ansi-color-filter-apply)
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+(defun ansi-color-show (&optional beg end)
+  "Interpret ANSI color esacape sequence by colorifying cotent.
+Operate on selected region on whole buffer."
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list (point-min) (point-max))))
+  (ansi-color-apply-on-region beg end))
