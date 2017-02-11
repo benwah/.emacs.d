@@ -36,6 +36,16 @@
 (add-to-list 'load-path "~/.emacs.d/secret")
 
 
+;; Backup directory
+(setq
+   backup-by-copying t      ; don't clobber symlinks
+   backup-directory-alist
+    '(("." . "~/.emacs.d/saves"))    ; don't litter my fs tree
+   delete-old-versions t
+   kept-new-versions 6
+   kept-old-versions 2
+   version-control t)       ; use versioned backups
+
 ;; "Custom" settings
 ;; -----------------
 
@@ -49,7 +59,7 @@
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
+    (nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
 
 
 ;; Re-builder style
@@ -109,6 +119,14 @@
 
 ;; Modes:
 ;; ------
+(require 'ansi-color)
+(defun colorize-compilation-buffer ()
+  (toggle-read-only)
+  (ansi-color-apply-on-region compilation-filter-start (point))
+  (toggle-read-only))
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+
+
 (use-package yaml-mode
   :ensure t)
 
@@ -254,7 +272,11 @@
               (whitespace-mode)
               (setq-default fill-column 79)
               (auto-fill-mode 80)
-              )))
+              ))
+  (require 'nose)
+  (add-hook 'python-mode-hook (lambda () (nose-mode t)))
+  )
+
 
 ;; Coffeescript
 (use-package coffee-mode
