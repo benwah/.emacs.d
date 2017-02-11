@@ -49,8 +49,12 @@
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
+    (multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
 
+
+;; Re-builder style
+(require 're-builder)
+(setq reb-re-syntax 'string)
 
 ;; Packaging
 ;; ---------
@@ -151,9 +155,7 @@
               (fci-mode t))))
 
 (use-package go-mode
-  :ensure t
-  :init
-  (require 'go-mode-autoloads))
+  :ensure t)
 
 (use-package flymake
   :init
@@ -268,18 +270,6 @@
               (set-fill-column 120)
               (fci-mode t)
               )))
-
-;; Multi-cursor
-;; TODO: Make C-S work and test this shit.
-;; (use-package multiple-cursors
-;;   :ensure t
-;;   :init
-;;   (require 'multiple-cursors)
-;;   (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
-;;   (global-set-key (kbd "C->") 'mc/mark-next-like-this)
-;;   (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-;;   (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
-;;   )
 
 ;; Ruby
 (defun inf-ruby-console-dev (dir)
@@ -416,6 +406,18 @@
 
 (add-to-list 'term-bind-key-alist
              '("M-<backspace>" . term-send-backward-kill-word))
+
+;; Multi-cursor
+;; TODO: Make C-S work and test this shit.
+(use-package multiple-cursors
+  :ensure t
+  :init
+  (require 'multiple-cursors)
+  (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+  (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+  (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+  (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+  )
 
 ;; SQL
 (defalias 'mysql-mode
