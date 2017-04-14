@@ -59,7 +59,7 @@
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
+    (nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flycheck fill-column-indicator coffee-mode))))
 
 
 ;; Re-builder style
@@ -175,12 +175,6 @@
 (use-package go-mode
   :ensure t)
 
-(use-package flymake
-  :init
-  (global-set-key (kbd "C-;") 'flymake-display-err-menu-for-current-line)
-  (global-set-key (kbd "C-c n") 'flymake-goto-next-error)
-  (global-set-key (kbd "C-c p") 'flymake-goto-prev-error))
-
 ;; Figure this shit out:
 
 ;; (use-package helm
@@ -190,24 +184,6 @@
 ;;   (helm-mode t)
 ;;   ;; (helm-autoresize-mode 1)
 ;;   ;; (setq helm-M-x-fuzzy-match t)
-;;   )
-
-;; (use-package ido
-;;   :init
-;;   (require 'ido)
-;;   (ido-mode t)
-;;   )
-
-;; (use-package flx-ido
-;;   :ensure t
-;;   :init
-;;     (require 'flx-ido)
-;;     (ido-mode 1)
-;;     (ido-everywhere 1)
-;;     (flx-ido-mode 1)
-;;     ;; disable ido faces to see flx highlights.
-;;     (setq ido-enable-flex-matching t)
-;;     (setq ido-use-faces nil)
 ;;   )
 
 (use-package osx-clipboard
@@ -237,12 +213,18 @@
   (helm-projectile-on))
 
 (use-package flycheck
-  :ensure t)
+  :ensure t
+  :init
+  (global-flycheck-mode)
+  (add-hook 'after-init-hook #'global-flycheck-mode)
+  (global-set-key (kbd "C-;") 'flycheck-display-error-at-point)
+  (global-set-key (kbd "C-c n") 'flycheck-next-error)
+  (global-set-key (kbd "C-c p") 'flycheck-previous-error)
+)
 
 ;; Emacs lisp
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
-            (flymake-mode)
             (flycheck-mode)
             (whitespace-mode)
             (set-fill-column 80)
@@ -251,24 +233,13 @@
 ;; Python
 (use-package python-mode
   :init
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.py\\'" flymake-pyflakes-init))
-  (defun flymake-pyflakes-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "~/.emacs.d/bin/pychecker.sh"  (list local-file))))
-
   (add-hook 'python-mode-hook
             (lambda ()
               (setq-default indent-tabs-mode nil)
               (setq tab-width 4)
-              (flymake-mode)
+              (flycheck-mode)
               (setq indent-region-function nil)
               (fci-mode t)
-              (flymake-pyflakes-init)
               (whitespace-mode)
               (setq-default fill-column 79)
               (auto-fill-mode 80)
@@ -281,14 +252,12 @@
 ;; Coffeescript
 (use-package coffee-mode
   :ensure t
-  :ensure flymake-coffee
   :init
   (add-to-list 'auto-mode-alist '("Cakefile" . coffee-mode))
   (custom-set-variables '(coffee-tab-width 2))
   (add-hook 'coffee-mode-hook
             (lambda ()
               (whitespace-mode)
-              (flymake-coffee-load)
               (set-fill-column 120)
               (fci-mode t)
               )))
@@ -312,7 +281,6 @@
 
 (use-package ruby-mode
   :ensure flycheck
-  :ensure flymake-ruby
   :ensure robe
   :init
   (setq
@@ -336,7 +304,6 @@
             (lambda()
               (setq-default indent-tabs-mode nil)
               (flycheck-mode)
-              (flymake-ruby-load)
               (hs-minor-mode)
               (whitespace-mode)
               (set-fill-column 120)
