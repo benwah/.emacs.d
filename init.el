@@ -49,7 +49,7 @@
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
+    (json-reformat web-beautify multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
 
 
 ;; Re-builder style
@@ -434,79 +434,6 @@
   (mapc 'kill-buffer
         (delq (current-buffer)
               (remove-if-not 'buffer-file-name (buffer-list)))))
-
-;; Custom functions
-(defun gh-projects-init ()
-  "Initialize gh-projects."
-
-  ;; This provides shortcuts to launch browser-windows in order to quickly
-  ;; access your projects' issues, branches and pull requests.
-  ;; For this to work properly, you need to add a configuration file called
-  ;; github-projects.el in your load-path somewhere.
-  ;;
-  ;; Sample "github-projects.el" in your load-path:
-
-  ;; ;;; github-project.el --- Config file
-  ;; ;;; Commentary:
-  ;; ;;; Code:
-  ;;
-  ;; (defvar gh-project-list
-  ;;   '(
-  ;;     (
-  ;;      "MyOrganization"
-  ;;      "MyGithubUsername"
-  ;;      (
-  ;;       ("my-project1" "o")
-  ;;       ("my-project2" "t")))))
-  ;;
-  ;; (provide 'github-projects)
-  ;; ;;; github-projects.el ends here
-
-  ;; This would define 8 shortcuts:
-  ;; C-c g p o: Open my pull requests for my-project1
-  ;; C-c g b o: Open my branches for my-project1
-  ;; C-c g i o: Open my issues for my-project1
-  ;; C-c g m o: Open master branch for my-project1
-  ;; C-c g p t: Open my pull requests for my-project2
-  ;; C-c g b t: Open my branches for my-project2
-  ;; C-c g m t: Open master branch for my-project2
-
-  (defun gh-open-path (organization project path)
-    (browse-url
-     (format "https://github.com/%s/%s/%s" organization project path)))
-
-  (defun gh-open-master (gh-organization gh-project)
-    (gh-open-path gh-organization gh-project ""))
-
-  (defun gh-open-branches (gh-organization gh-project)
-    (gh-open-path gh-organization gh-project "branches/yours"))
-
-  (defun gh-open-prs (gh-organization gh-project gh-user)
-    (gh-open-path gh-organization gh-project (format "pulls/%s" gh-user)))
-
-  (defun gh-open-assigned-issues (gh-organization gh-project gh-user)
-    (gh-open-path gh-organization gh-project (format "issues/assigned/%s" gh-user)))
-
-  (defvar gh-project-list)
-  (require 'github-projects)
-  (if (boundp 'gh-project-list)
-      (let (row organization username projects)
-        (while gh-project-list
-          (setq row (pop gh-project-list))
-          (setq organization (pop row))
-          (setq username (pop row))
-          (setq projects (pop row))
-          (let (project-row project shortcut)
-            (while projects
-              (setq project-row (pop projects))
-              (setq project (pop project-row))
-              (setq shortcut (pop project-row))
-
-              (global-set-key (kbd (format "C-c g p %s" shortcut)) `(lambda () (interactive) (gh-open-prs ',organization ',project ',username)))
-              (global-set-key (kbd (format "C-c g b %s" shortcut)) `(lambda () (interactive) (gh-open-branches ',organization ',project)))
-              (global-set-key (kbd (format "C-c g i %s" shortcut)) `(lambda () (interactive) (gh-open-assigned-issues ',organization ',project ',username)))
-              (global-set-key (kbd (format "C-c g m %s" shortcut)) `(lambda () (interactive) (gh-open-master ',organization ',project)))))))))
-(gh-projects-init)
 
 ;; Key bindings.
 ;; -------------
