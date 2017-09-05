@@ -33,6 +33,9 @@ tramp
 
 elpa/
 auto-save-list/
-secret/
 jabber-history/
 projectile-bookmarks.eld
+
+secrets/
+session.*
+network-security.data
