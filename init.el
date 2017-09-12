@@ -98,6 +98,12 @@
       :init
       (exec-path-from-shell-initialize)))
 
+;; Until emacs 25.3: https://lists.gnu.org/archive/html/emacs-devel/2017-09/msg00211.html
+(eval-after-load "enriched"
+  '(defun enriched-decode-display-prop (start end &optional param)
+     (list start end)))
+
+
 (use-package fill-column-indicator
   :ensure t)
 
