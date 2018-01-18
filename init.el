@@ -59,7 +59,12 @@
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile monokai-theme magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode))))
+    (emacsql green-screen-theme python-mode nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode)))
+ '(sql-mysql-login-params
+   (quote
+    ((user :default "")
+     (server :default "")
+     (database :default "")))))
 
 ;; Re-builder style
 (require 're-builder)
@@ -104,15 +109,20 @@
      (list start end)))
 
 
+(use-package emacsql
+  :ensure t)
+
 (use-package fill-column-indicator
   :ensure t)
 
 ;; Theme:
 ;; ------
-(use-package monokai-theme
+
+(use-package green-screen-theme
   :ensure t
   :init
-  (load-theme 'monokai t))
+  ;; (load-theme 'green-screen t)
+)
 
 (use-package smart-cursor-color
   :ensure t
@@ -188,6 +198,7 @@
 
 ;; Figure this shit out:
 
+(require 'tramp)
 ;; (use-package helm
 ;;   :ensure t
 ;;   :init
@@ -254,34 +265,30 @@
             (fci-mode t)))
 
 ;; Python
-(use-package python-mode
-  :init
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.py\\'" flymake-pyflakes-init))
-  (defun flymake-pyflakes-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "~/.emacs.d/bin/pychecker.sh"  (list local-file))))
+(add-to-list 'flymake-allowed-file-name-masks
+             '("\\.py\\'" flymake-pyflakes-init))
+(defun flymake-pyflakes-init ()
+  (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                     'flymake-create-temp-inplace))
+         (local-file (file-relative-name
+                      temp-file
+                      (file-name-directory buffer-file-name))))
+    (list "~/.emacs.d/bin/pychecker.sh"  (list local-file))))
 
-  (add-hook 'python-mode-hook
-            (lambda ()
-              (setq-default indent-tabs-mode nil)
-              (setq tab-width 4)
-              (flymake-mode)
-              (setq indent-region-function nil)
-              (fci-mode t)
-              (flymake-pyflakes-init)
-              (whitespace-mode)
-              (setq-default fill-column 79)
-              (auto-fill-mode 80)
-              ))
-  (require 'nose)
-  (add-hook 'python-mode-hook (lambda () (nose-mode t)))
-  )
-
+(add-hook 'python-mode-hook
+          (lambda ()
+            (setq-default indent-tabs-mode nil)
+            (setq tab-width 4)
+            (flymake-mode)
+            (setq indent-region-function nil)
+            (fci-mode t)
+            (flymake-pyflakes-init)
+            (whitespace-mode)
+            (setq-default fill-column 79)
+            (auto-fill-mode 80)
+            ))
+(require 'nose)
+(add-hook 'python-mode-hook (lambda () (nose-mode t)))
 
 ;; Coffeescript
 (use-package coffee-mode
@@ -445,13 +452,6 @@
   (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
   (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
   )
-
-;; SQL
-(defalias 'mysql-mode
-  (lambda()
-    (interactive)
-    (sql-mode)
-    (sql-highlight-mysql-keywords)))
 
 ;; Utils
 ;; -----
