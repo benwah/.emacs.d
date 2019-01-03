@@ -17,9 +17,15 @@
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
 (column-number-mode 1)              ; Display column number
 (desktop-save-mode -1)               ; Save / restore opened files.
-(menu-bar-mode -1)                  ; No menu bar
-(tool-bar-mode -1)                  ; No toolbar
-(scroll-bar-mode -1)                ; No scrollbar
+
+(if (display-graphic-p)
+    (progn
+      (menu-bar-mode -1)                  ; No menu bar
+      (tool-bar-mode -1)                  ; No toolbar
+      (scroll-bar-mode -1)                ; No scrollbar
+      )
+)
+
 (setq x-select-enable-clipboard t)
 (setq make-backup-files -1)         ; stop creating backup~ files
 (setq auto-save-default -1)         ; stop creating #autosave# files
@@ -59,7 +65,7 @@
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (emacsql green-screen-theme python-mode nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode)))
+    (helm-ag ag typescript graphql-mode dismal cheatsheet exec-path-from-shell emacsql moe-theme python-mode nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile magit less-css-mode go-mode flycheck fill-column-indicator coffee-mode)))
  '(sql-mysql-login-params
    (quote
     ((user :default "")
@@ -118,10 +124,11 @@
 ;; Theme:
 ;; ------
 
-(use-package green-screen-theme
+(use-package moe-theme
   :ensure t
   :init
-  ;; (load-theme 'green-screen t)
+  (require 'moe-theme)
+  (load-theme 'moe-dark t)
 )
 
 (use-package smart-cursor-color
@@ -190,42 +197,6 @@
 (use-package go-mode
   :ensure t)
 
-(use-package flymake
-  :init
-  (global-set-key (kbd "C-;") 'flymake-display-err-menu-for-current-line)
-  (global-set-key (kbd "C-c n") 'flymake-goto-next-error)
-  (global-set-key (kbd "C-c p") 'flymake-goto-prev-error))
-
-;; Figure this shit out:
-
-(require 'tramp)
-;; (use-package helm
-;;   :ensure t
-;;   :init
-;;   (require 'helm-config)
-;;   (helm-mode t)
-;;   ;; (helm-autoresize-mode 1)
-;;   ;; (setq helm-M-x-fuzzy-match t)
-;;   )
-
-;; (use-package ido
-;;   :init
-;;   (require 'ido)
-;;   (ido-mode t)
-;;   )
-
-;; (use-package flx-ido
-;;   :ensure t
-;;   :init
-;;     (require 'flx-ido)
-;;     (ido-mode 1)
-;;     (ido-everywhere 1)
-;;     (flx-ido-mode 1)
-;;     ;; disable ido faces to see flx highlights.
-;;     (setq ido-enable-flex-matching t)
-;;     (setq ido-use-faces nil)
-;;   )
-
 (use-package osx-clipboard
   :ensure t
   :init
@@ -244,10 +215,12 @@
 (use-package projectile
   :ensure t
   :init
-  (projectile-global-mode))
+  (projectile-global-mode)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  )
 
 (use-package helm-projectile
-  :ensure t
+  :ensure helm-ag
   :init
   (setq projectile-completion-system 'helm)
   (helm-projectile-on))
@@ -258,49 +231,33 @@
 ;; Emacs lisp
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
-            (flymake-mode)
             (flycheck-mode)
             (whitespace-mode)
             (set-fill-column 80)
             (fci-mode t)))
 
 ;; Python
-(add-to-list 'flymake-allowed-file-name-masks
-             '("\\.py\\'" flymake-pyflakes-init))
-(defun flymake-pyflakes-init ()
-  (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                     'flymake-create-temp-inplace))
-         (local-file (file-relative-name
-                      temp-file
-                      (file-name-directory buffer-file-name))))
-    (list "~/.emacs.d/bin/pychecker.sh"  (list local-file))))
-
 (add-hook 'python-mode-hook
           (lambda ()
+            (setq python-shell-interpreter "pyenv python")
             (setq-default indent-tabs-mode nil)
             (setq tab-width 4)
-            (flymake-mode)
             (setq indent-region-function nil)
             (fci-mode t)
-            (flymake-pyflakes-init)
             (whitespace-mode)
             (setq-default fill-column 79)
             (auto-fill-mode 80)
             ))
-(require 'nose)
-(add-hook 'python-mode-hook (lambda () (nose-mode t)))
 
 ;; Coffeescript
 (use-package coffee-mode
   :ensure t
-  :ensure flymake-coffee
   :init
   (add-to-list 'auto-mode-alist '("Cakefile" . coffee-mode))
   (custom-set-variables '(coffee-tab-width 2))
   (add-hook 'coffee-mode-hook
             (lambda ()
               (whitespace-mode)
-              (flymake-coffee-load)
               (set-fill-column 120)
               (fci-mode t)
               )))
@@ -324,7 +281,6 @@
 
 (use-package ruby-mode
   :ensure flycheck
-  :ensure flymake-ruby
   :ensure robe
   :init
   (setq
@@ -339,7 +295,7 @@
                     ,(rx (or "}" "]" "end"))                            ; Block end
                     ,(rx (or "#" "=begin"))                             ; Comment start
                     ruby-forward-sexp nil)))
-  (setq flycheck-checker-error-threshold 800)
+  (setq flycheck-checker-error-threshold 400)
   (add-to-list 'auto-mode-alist
                '("\\.\\(?:gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'" . ruby-mode))
   (add-to-list 'auto-mode-alist
@@ -348,7 +304,6 @@
             (lambda()
               (setq-default indent-tabs-mode nil)
               (flycheck-mode)
-              (flymake-ruby-load)
               (hs-minor-mode)
               (whitespace-mode)
               (set-fill-column 120)
@@ -409,7 +364,8 @@
 
 (defun minitest--run-command (command &optional file-name)
   "Override."
-  (let ((compilation-scroll-output t)
+  (let (
+        (compilation-scroll-output t)
         (actual-command (concat
                          (format "source ~/.bash_profile && cd %s && " (minitest-project-root))
                          (or minitest-default-env "")
@@ -424,22 +380,13 @@
 
 (defun minitest--file-command (&optional post-command)
   "Run command on currently visited file.  POST-COMMAND are optional arguments."
-  (let ((file-name (file-relative-name (buffer-file-name) (minitest-project-root))))
+  (let (
+        (file-name
+         (file-relative-name (file-truename (buffer-file-name)) (minitest-project-root)))
+        )
     (if file-name
         (minitest-run-file file-name post-command)
       (error "Buffer is not visiting a file"))))
-
-;; Terminal
-(use-package multi-term
-  :ensure t
-  :init
-  (require 'multi-term)
-  (setq multi-term-program "/bin/bash"))
-
-(global-set-key (kbd "C-c t") 'shell)
-
-(add-to-list 'term-bind-key-alist
-             '("M-<backspace>" . term-send-backward-kill-word))
 
 ;; Multi-cursor
 ;; TODO: Make C-S work and test this shit.
