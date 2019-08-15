@@ -18,13 +18,14 @@
 (column-number-mode 1)              ; Display column number
 (desktop-save-mode -1)               ; Save / restore opened files.
 
+(menu-bar-mode -1)                  ; No menu bar
+
 (if (display-graphic-p)
     (progn
-      (menu-bar-mode -1)                  ; No menu bar
       (tool-bar-mode -1)                  ; No toolbar
       (scroll-bar-mode -1)                ; No scrollbar
       )
-)
+  )
 
 (setq x-select-enable-clipboard t)
 (setq make-backup-files -1)         ; stop creating backup~ files
@@ -61,16 +62,26 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
+ '(indent-tabs-mode nil)
+ '(markdown-list-indent-width 2)
  '(minitest-default-command (quote ("dev" "test")))
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (helm-ag ag typescript graphql-mode dismal cheatsheet exec-path-from-shell emacsql moe-theme python-mode nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile magit less-css-mode go-mode flycheck fill-column-indicator coffee-mode)))
+    (company tide typescript-mode rust-mode helm-ag ag typescript flymake-cursor graphql-mode dismal cheatsheet exec-path-from-shell emacsql moe-theme python-mode nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode)))
+ '(smie-indent-basic 2)
  '(sql-mysql-login-params
    (quote
-    ((user :default "")
-     (server :default "")
-     (database :default "")))))
+    ((user :default "root")
+     (server :default "shipify.railgun")
+     (database :default "shipify_dev"))))
+ '(standard-indent 2)
+ '(tide-format-options (quote (:indentSize 2 :tabSize 2 :basicIndentSize 2)))
+ '(typescript-indent-level 2)
+ '(web-mode-code-indent-offset 2)
+ '(web-mode-css-indent-offset 2)
+ '(web-mode-markup-indent-offset 2)
+ '(web-mode-sql-indent-offset 2))
 
 ;; Re-builder style
 (require 're-builder)
@@ -148,7 +159,6 @@
   (toggle-read-only))
 (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 
-
 (use-package yaml-mode
   :ensure t)
 
@@ -170,9 +180,45 @@
                '("\\.js\\'" . web-mode))
   (add-to-list 'auto-mode-alist
                '("\\.liquid\\'" . web-mode))
+  (add-to-list 'auto-mode-alist
+               '("\\.tsx\\'" . web-mode))
   (add-hook 'web-mode-hook
             (lambda ()
-              (setq-default indent-tabs-mode nil))))
+              (setq web-mode-markup-indent-offset 2)
+              (setq-default indent-tabs-mode nil)
+              (when (string-equal "tsx" (file-name-extension buffer-file-name))
+                (setup-tide-mode))))
+  )
+
+(defun setup-tide-mode ()
+  (interactive)
+  (tide-setup)
+  (flycheck-mode +1)
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (eldoc-mode +1)
+  (tide-hl-identifier-mode +1)
+  ;; company is an optional dependency. You have to
+  ;; install it separately via package-install
+  ;; `M-x package-install [ret] company`
+  (company-mode +1))
+
+(use-package company
+  :ensure t
+  )
+
+(use-package typescript-mode
+  :ensure t
+  :init
+  )
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . setup-tide-mode)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save))
+  )
+
 
 (use-package scss-mode
   :ensure t
@@ -496,3 +542,11 @@ Operate on selected region on whole buffer."
        (list (region-beginning) (region-end))
      (list (point-min) (point-max))))
   (ansi-color-apply-on-region beg end))
+
+
+;; Macros
+
+(fset 'attributes-to-fixture
+   "\C-[xreplace-string\C-m \"\C-m\C-m\C-[<\C-[xreplace-string\C-m\"=>\C-m { \C-m\C-[<\C-[xreplace-string\C-m,\C-q\C-j\C-m }\C-q\C-j\C-m")
+(fset 'attributes-to-hash
+   "\C-[xreplace-string\C-m \"\C-m\C-m\C-[<\C-[xreplace-string\C-m\"=>\C-m: \C-m\C-[<\C-[xreplace-string\C-m,\C-q\C-j\C-m\C-q\C-j\C-m")
