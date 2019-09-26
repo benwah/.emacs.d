@@ -236,9 +236,22 @@
   (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
   )
 
+(use-package helm
+  :ensure t
+)
+
+(use-package helm-ag
+  :ensure t
+)
+
+(use-package helm-projectile
+  :ensure t
+)
+
 (use-package projectile
-  :ensure helm-projectile
+  :ensure helm
   :ensure helm-ag
+  :ensure helm-projectile
   :init
   (projectile-global-mode)
   (setq projectile-completion-system 'helm)
