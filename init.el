@@ -35,6 +35,7 @@
 (defvar whitespace-style (quote (face trailing empty tabs)))
 (setq-default indent-tabs-mode nil)
 (global-hl-line-mode 1)
+(global-display-line-numbers-mode 1)
 (set-face-background hl-line-face "gray20")
 
 ;; Load-path
@@ -62,13 +63,14 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
+ '(flycheck-indication-mode nil)
  '(indent-tabs-mode nil)
  '(markdown-list-indent-width 2)
  '(minitest-default-command (quote ("dev" "test")))
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (company tide typescript-mode rust-mode helm-ag ag typescript flymake-cursor graphql-mode dismal cheatsheet exec-path-from-shell emacsql moe-theme python-mode nose jinja2-mode multiple-cursors csv-mode multi-term minitest robe helm-projectile osx-clipboard markdown-mode yaml-mode smart-cursor-color eruby-mode web-mode use-package slim-mode scss-mode rainbow-mode projectile magit less-css-mode go-mode flymake-ruby flymake-coffee flycheck fill-column-indicator coffee-mode)))
+    (multiple-cursors minitest robe coffee-mode flycheck helm-ag projectile magit osx-clipboard go-mode rainbow-mode slim-mode scss-mode typescript-mode web-mode markdown-mode yaml-mode smart-cursor-color moe-theme fill-column-indicator emacsql use-package)))
  '(smie-indent-basic 2)
  '(sql-mysql-login-params
    (quote
@@ -76,7 +78,6 @@
      (server :default "shipify.railgun")
      (database :default "shipify_dev"))))
  '(standard-indent 2)
- '(tide-format-options (quote (:indentSize 2 :tabSize 2 :basicIndentSize 2)))
  '(typescript-indent-level 2)
  '(web-mode-code-indent-offset 2)
  '(web-mode-css-indent-offset 2)
@@ -180,45 +181,22 @@
                '("\\.js\\'" . web-mode))
   (add-to-list 'auto-mode-alist
                '("\\.liquid\\'" . web-mode))
-  (add-to-list 'auto-mode-alist
-               '("\\.tsx\\'" . web-mode))
   (add-hook 'web-mode-hook
             (lambda ()
               (setq web-mode-markup-indent-offset 2)
-              (setq-default indent-tabs-mode nil)
-              (when (string-equal "tsx" (file-name-extension buffer-file-name))
-                (setup-tide-mode))))
-  )
-
-(defun setup-tide-mode ()
-  (interactive)
-  (tide-setup)
-  (flycheck-mode +1)
-  (setq flycheck-check-syntax-automatically '(save mode-enabled))
-  (eldoc-mode +1)
-  (tide-hl-identifier-mode +1)
-  ;; company is an optional dependency. You have to
-  ;; install it separately via package-install
-  ;; `M-x package-install [ret] company`
-  (company-mode +1))
-
-(use-package company
-  :ensure t
+              (setq-default indent-tabs-mode nil)))
   )
 
 (use-package typescript-mode
   :ensure t
   :init
-  )
-
-(use-package tide
-  :ensure t
-  :after (typescript-mode company flycheck)
-  :hook ((typescript-mode . setup-tide-mode)
-         (typescript-mode . tide-hl-identifier-mode)
-         (before-save . tide-format-before-save))
-  )
-
+  (add-to-list 'auto-mode-alist
+               '("\\.tsx\\'" . typescript-mode))
+  (add-to-list 'auto-mode-alist
+               '("\\.ts\\'" . typescript-mode))
+  ;; requires https://github.com/mantoni/eslint_d.js
+  (setq flycheck-javascript-eslint-executable "eslint_d")
+)
 
 (use-package scss-mode
   :ensure t
@@ -267,12 +245,16 @@
 
 (use-package helm-projectile
   :ensure helm-ag
+  :ensure projectile
   :init
   (setq projectile-completion-system 'helm)
   (helm-projectile-on))
 
 (use-package flycheck
-  :ensure t)
+  :ensure t
+  :init
+  (global-flycheck-mode)
+)
 
 ;; Emacs lisp
 (add-hook 'emacs-lisp-mode-hook
@@ -511,12 +493,7 @@
 (provide 'init)
 ;;; init.el ends here
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
 
 
 (defun toggle-fullscreen ()
@@ -550,3 +527,9 @@ Operate on selected region on whole buffer."
    "\C-[xreplace-string\C-m \"\C-m\C-m\C-[<\C-[xreplace-string\C-m\"=>\C-m { \C-m\C-[<\C-[xreplace-string\C-m,\C-q\C-j\C-m }\C-q\C-j\C-m")
 (fset 'attributes-to-hash
    "\C-[xreplace-string\C-m \"\C-m\C-m\C-[<\C-[xreplace-string\C-m\"=>\C-m: \C-m\C-[<\C-[xreplace-string\C-m,\C-q\C-j\C-m\C-q\C-j\C-m")
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

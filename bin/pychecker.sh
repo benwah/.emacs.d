@@ -13,6 +13,6 @@
 #     '(py-pychecker-command-args (quote ("")))
 #     '(python-check-command "pychecker.sh")
 
-pyflakes $1 | grep -v /migrations/
+pyenv exec pyflakes $1 | grep -v /migrations/
 echo "## pyflakes above, pep8 below ##"
-pep8 --repeat --exclude migrations $1
+pyenv exec pep8 --repeat --exclude migrations $1
