@@ -70,7 +70,7 @@
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (multiple-cursors minitest robe coffee-mode flycheck helm-ag projectile magit osx-clipboard go-mode rainbow-mode slim-mode scss-mode typescript-mode web-mode markdown-mode yaml-mode smart-cursor-color moe-theme fill-column-indicator emacsql use-package)))
+    (helm-projectile multiple-cursors minitest robe coffee-mode flycheck helm-ag projectile magit osx-clipboard go-mode rainbow-mode slim-mode scss-mode typescript-mode web-mode markdown-mode yaml-mode smart-cursor-color moe-theme fill-column-indicator emacsql use-package)))
  '(smie-indent-basic 2)
  '(sql-mysql-login-params
    (quote
@@ -237,18 +237,13 @@
   )
 
 (use-package projectile
-  :ensure t
+  :ensure helm-projectile
+  :ensure helm-ag
   :init
   (projectile-global-mode)
+  (setq projectile-completion-system 'helm)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   )
-
-(use-package helm-projectile
-  :ensure helm-ag
-  :ensure projectile
-  :init
-  (setq projectile-completion-system 'helm)
-  (helm-projectile-on))
 
 (use-package flycheck
   :ensure t
