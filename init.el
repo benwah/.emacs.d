@@ -11,7 +11,6 @@
 
 ;; Global settings
 ;; ---------------
-(setenv "PATH" (shell-command-to-string "source ~/.bash_profile; echo -n $PATH"))
 (electric-pair-mode -1)              ; Automagically close parenthesis / brackets.
 (delete-selection-mode -1)          ; Deletes content of marked-text when typing.
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
@@ -66,17 +65,11 @@
  '(flycheck-indication-mode nil)
  '(indent-tabs-mode nil)
  '(markdown-list-indent-width 2)
- '(minitest-default-command (quote ("dev" "test")))
  '(minitest-use-bundler nil)
  '(package-selected-packages
    (quote
-    (helm-projectile multiple-cursors minitest robe coffee-mode flycheck helm-ag projectile magit osx-clipboard go-mode rainbow-mode slim-mode scss-mode typescript-mode web-mode markdown-mode yaml-mode smart-cursor-color moe-theme fill-column-indicator emacsql use-package)))
+    (helm helm-projectile multiple-cursors minitest robe coffee-mode flycheck helm-ag projectile magit osx-clipboard go-mode rainbow-mode slim-mode scss-mode typescript-mode web-mode markdown-mode yaml-mode smart-cursor-color moe-theme fill-column-indicator emacsql use-package)))
  '(smie-indent-basic 2)
- '(sql-mysql-login-params
-   (quote
-    ((user :default "root")
-     (server :default "shipify.railgun")
-     (database :default "shipify_dev"))))
  '(standard-indent 2)
  '(typescript-indent-level 2)
  '(web-mode-code-indent-offset 2)
@@ -299,22 +292,6 @@
               )))
 
 ;; Ruby
-(defun inf-ruby-console-dev (dir)
-  "Run dev console"
-  (interactive "D")
-  (let ((default-directory (file-name-as-directory dir)))
-    (unless (file-exists-p "dev.yml")
-      (error "The directory must contain a dev.yml"))
-    (run-ruby "bash -c \"source ~/.bash_profile && dev console\"")))
-
-(defvar inf-ruby-console-patterns-alist
-  '(
-    ("dev.yml" . dev)
-    (inf-ruby-console-rails-p . rails)
-    ("*.gemspec" . gem)
-    (inf-ruby-console-racksh-p . racksh)
-    ("Gemfile" . default)))
-
 (use-package ruby-mode
   :ensure flycheck
   :ensure robe
