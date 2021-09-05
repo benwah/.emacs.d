@@ -58,11 +58,11 @@
 (use-package markdown-mode
   :ensure t)
 
-(use-package monokai-theme
+(use-package cyberpunk-theme
   :ensure t
   :init
-  (load-theme 'monokai t)
-  (set-face-attribute 'default nil :height 140 :family "Inconsolata")
+  (load-theme 'cyberpunk t)
+  (set-face-attribute 'default nil :height 130 :family "Fira Code")
 )
 
 (use-package smart-cursor-color
@@ -171,16 +171,3 @@
 
 (provide 'init)
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(pyenv-mode yaml-mode web-mode vue-mode virtualenv use-package sublimity smooth-scrolling smart-cursor-color slim-mode scss-mode rainbow-mode python-pytest osx-clipboard monokai-theme markdown-mode magit helm-projectile helm-ag good-scroll go-mode flycheck fill-column-indicator exec-path-from-shell elpy blacken anaconda-mode)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
