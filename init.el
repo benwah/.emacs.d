@@ -83,13 +83,19 @@
   :init
   (add-hook 'css-mode-hook
             (lambda()
-              (whitespace-mode)
               (rainbow-mode 1)
               (set-fill-column 120)
               (fci-mode t))))
 
 
 ;; Python
+
+;; TODO: PEP8, Black, etc.
+
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
 (use-package pyenv-mode
   :ensure t
   :config
@@ -102,9 +108,7 @@
   (add-hook 'python-mode-hook 'anaconda-mode))
 
 (use-package blacken
-  :ensure t
-  :config
-  (add-hook 'python-mode-hook 'blacken-mode))
+  :ensure t)
 
 (use-package python-pytest
   :ensure t
@@ -117,8 +121,7 @@
             (auto-fill-mode 80)
             (setq tab-width 4)
             (setq-default fill-column 79)
-            (fci-mode t)
-            (whitespace-mode)))
+            (fci-mode t)))
 
 (defun projectile-pyenv-mode-set ()
   "Set pyenv version matching project name."
@@ -175,3 +178,16 @@
 
 (provide 'init)
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
