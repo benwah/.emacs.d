@@ -16,6 +16,10 @@
 (show-paren-mode 1)                 ; Highlight matching parenthesis.
 (column-number-mode 1)              ; Display column number
 (tool-bar-mode -1)                  ; No toolbar
+(scroll-bar-mode -1)
+(setq make-backup-files -1)
+(setq auto-save-default -1)
+(setq require-final-newline nil)
 
 ;; Backup directory
 (setq
