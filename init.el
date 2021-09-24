@@ -20,6 +20,9 @@
 (setq make-backup-files -1)
 (setq auto-save-default -1)
 (setq require-final-newline nil)
+(setq-default smerge-command-prefix (kbd "C-c v"))
+(setq-default js2-basic-offset 2)
+(setq-default js-indent-level 2)
 
 ;; Backup directory
 (setq
@@ -88,6 +91,21 @@
               (fci-mode t))))
 
 
+;; Javascript
+(use-package js2-mode
+  :ensure t
+  :init
+  (setq auto-mode-alist (cons '("\\.js[mx]?\\'" . js2-mode) auto-mode-alist)))
+
+
+(use-package jest
+  :after (js2-mode)
+  :init
+  (add-hook 'js2-mode-hook
+	    (lambda () (interactive)
+	      (jest-minor-mode)
+	      (local-set-key (kbd "C-c t f") 'jest-popup))))
+
 ;; Python
 
 ;; TODO: PEP8, Black, etc.
@@ -112,9 +130,13 @@
 
 (use-package python-pytest
   :ensure t
-  :bind (("C-c t a" . python-pytest)
-         ("C-c t f" . python-pytest-file-dwim)
-         ("C-c t t" . python-pytest-function-dwim)))
+  :init
+  (add-hook 'python-mode-hook
+	    (lambda ()
+	      (local-set-key (kbd "C-c t a") 'python-pytest)
+	      (local-set-key (kbd "C-c t f") 'python-pytest-file)
+	      (local-set-key (kbd "C-c t t") 'python-pytest-function))))
+
 
 (add-hook 'python-mode-hook
           (lambda ()
@@ -184,7 +206,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode)))
+   '(jest js2-mode po-mode vue-mode flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

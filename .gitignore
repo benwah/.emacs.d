@@ -39,3 +39,5 @@ projectile-bookmarks.eld
 secrets/
 session.*
 network-security.data
+anaconda-mode
+transient
