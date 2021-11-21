@@ -150,7 +150,6 @@
   )
 
 (defun python-pytest-kitty-wrapper (pytest-fname)
-  (message "pytest-fname: %s" pytest-fname)
   (put 'python-pytest-kitty 'interactive-form (interactive-form pytest-fname))
   (put 'python-pytest-kitty 'pytest-fun pytest-fname)
   (call-interactively 'python-pytest-kitty pytest-fname)
