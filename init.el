@@ -128,6 +128,61 @@
 (use-package blacken
   :ensure t)
 
+(require 'subr-x)
+(cl-defun python-pytest--run-command-in-kitty (&key command edit)
+  (let 
+      (
+       (long-command
+	(concat
+	 "/opt/homebrew/bin/kitty --directory="
+	 (python-pytest--project-root)
+	 " bash -l -c \"pyenv activate "
+	 (pyenv-mode-version)
+	 " && PYTHONBREAKPOINT=\"pudb.set_trace\" "
+	 command
+	 "; exec bash\""
+	 )
+	)
+       )
+    (message "Running test in kitty with the command: %s" long-command)
+    (start-process-shell-command "RUN" "RUN" long-command)
+    )
+  )
+
+(defun python-pytest-kitty-wrapper (pytest-fname)
+  (message "pytest-fname: %s" pytest-fname)
+  (put 'python-pytest-kitty 'interactive-form (interactive-form pytest-fname))
+  (put 'python-pytest-kitty 'pytest-fun pytest-fname)
+  (call-interactively 'python-pytest-kitty pytest-fname)
+  )
+
+(defun python-pytest-kitty-function ()
+  (interactive)
+  (python-pytest-kitty-wrapper 'python-pytest-function)
+  )
+
+(defun python-pytest-kitty-file ()
+  (interactive)
+  (python-pytest-kitty-wrapper 'python-pytest-file)
+  )
+
+(defun python-pytest-kitty-all ()
+  (interactive)
+  (python-pytest-kitty-wrapper 'python-pytest)
+  )
+
+(defun python-pytest-kitty (&rest args)
+  (
+   advice-add
+   'python-pytest--run-command
+   :override
+   #'python-pytest--run-command-in-kitty
+   )
+  (apply (get 'python-pytest-kitty 'pytest-fun) args)
+  (advice-remove 'python-pytest--run-command #'python-pytest--run-command-in-kitty)
+)
+
+
 (use-package python-pytest
   :ensure t
   :init
@@ -135,8 +190,11 @@
 	    (lambda ()
 	      (local-set-key (kbd "C-c t a") 'python-pytest)
 	      (local-set-key (kbd "C-c t f") 'python-pytest-file)
-	      (local-set-key (kbd "C-c t t") 'python-pytest-function))))
-
+	      (local-set-key (kbd "C-c t t") 'python-pytest-function)
+	      (local-set-key (kbd "C-c t A") 'python-pytest-kitty-all)
+	      (local-set-key (kbd "C-c t F") 'python-pytest-kitty-file)
+	      (local-set-key (kbd "C-c t T") 'python-pytest-kitty-function)
+	      )))
 
 (add-hook 'python-mode-hook
           (lambda ()
@@ -206,7 +264,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(jest js2-mode po-mode vue-mode flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode)))
+   '(vterm jest js2-mode po-mode vue-mode flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
