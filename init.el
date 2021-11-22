@@ -128,71 +128,80 @@
 (use-package blacken
   :ensure t)
 
-(require 'subr-x)
-(cl-defun python-pytest--run-command-in-kitty (&key command edit)
-  (let 
-      (
-       (long-command
-	(concat
-	 "/opt/homebrew/bin/kitty --directory="
-	 (python-pytest--project-root)
-	 " bash -l -c \"pyenv activate "
-	 (pyenv-mode-version)
-	 " && PYTHONBREAKPOINT=\"pudb.set_trace\" "
-	 command
-	 "; exec bash\""
+(use-package vterm
+  :ensure t
+  :init
+  ;; Toggle copy mode keybinding: C-c C-t
+  (add-hook 'vterm-mode-hook
+          (function (lambda ()
+		      (message "Hooked")
+                      (local-set-key (kbd "C-M-h") 'windmove-left)
+                      (local-set-key (kbd "C-M-l") 'windmove-right)
+                      (local-set-key (kbd "C-M-k") 'windmove-up)
+                      (local-set-key (kbd "C-M-j") 'windmove-down))))
+  (cl-defun python-pytest--run-command-in-vterm (&key command edit)
+    (let 
+	(
+	 (long-command
+	  (concat
+	   "cd "
+	   (python-pytest--project-root)
+	   " && PYTHONBREAKPOINT=\"pudb.set_trace\" "
+	   command
+	   )
+	  )
 	 )
-	)
-       )
-    (message "Running test in kitty with the command: %s" long-command)
-    (start-process-shell-command "RUN" "RUN" long-command)
+      (message "Running test in vterm with the command: %s" long-command)
+      (vterm)
+      (vterm-send-string long-command)
+      (vterm-send-return)
+      )
+    )
+
+  (defun python-pytest-vterm-wrapper (pytest-fname)
+    (put 'python-pytest-vterm 'interactive-form (interactive-form pytest-fname))
+    (put 'python-pytest-vterm 'pytest-fun pytest-fname)
+    (call-interactively 'python-pytest-vterm pytest-fname)
+    )
+
+  (defun python-pytest-vterm-function ()
+    (interactive)
+    (python-pytest-vterm-wrapper 'python-pytest-function)
+    )
+
+  (defun python-pytest-vterm-file ()
+    (interactive)
+    (python-pytest-vterm-wrapper 'python-pytest-file)
+    )
+
+  (defun python-pytest-vterm-all ()
+    (interactive)
+    (python-pytest-vterm-wrapper 'python-pytest)
+    )
+
+  (defun python-pytest-vterm (&rest args)
+    (
+     advice-add
+     'python-pytest--run-command
+     :override
+     #'python-pytest--run-command-in-vterm
+     )
+    (apply (get 'python-pytest-vterm 'pytest-fun) args)
+    (advice-remove 'python-pytest--run-command #'python-pytest--run-command-in-vterm)
     )
   )
-
-(defun python-pytest-kitty-wrapper (pytest-fname)
-  (put 'python-pytest-kitty 'interactive-form (interactive-form pytest-fname))
-  (put 'python-pytest-kitty 'pytest-fun pytest-fname)
-  (call-interactively 'python-pytest-kitty pytest-fname)
-  )
-
-(defun python-pytest-kitty-function ()
-  (interactive)
-  (python-pytest-kitty-wrapper 'python-pytest-function)
-  )
-
-(defun python-pytest-kitty-file ()
-  (interactive)
-  (python-pytest-kitty-wrapper 'python-pytest-file)
-  )
-
-(defun python-pytest-kitty-all ()
-  (interactive)
-  (python-pytest-kitty-wrapper 'python-pytest)
-  )
-
-(defun python-pytest-kitty (&rest args)
-  (
-   advice-add
-   'python-pytest--run-command
-   :override
-   #'python-pytest--run-command-in-kitty
-   )
-  (apply (get 'python-pytest-kitty 'pytest-fun) args)
-  (advice-remove 'python-pytest--run-command #'python-pytest--run-command-in-kitty)
-)
-
 
 (use-package python-pytest
   :ensure t
   :init
   (add-hook 'python-mode-hook
 	    (lambda ()
-	      (local-set-key (kbd "C-c t a") 'python-pytest)
-	      (local-set-key (kbd "C-c t f") 'python-pytest-file)
-	      (local-set-key (kbd "C-c t t") 'python-pytest-function)
-	      (local-set-key (kbd "C-c t A") 'python-pytest-kitty-all)
-	      (local-set-key (kbd "C-c t F") 'python-pytest-kitty-file)
-	      (local-set-key (kbd "C-c t T") 'python-pytest-kitty-function)
+	      ;; (local-set-key (kbd "C-c t a") 'python-pytest)
+	      ;; (local-set-key (kbd "C-c t f") 'python-pytest-file)
+	      ;; (local-set-key (kbd "C-c t t") 'python-pytest-function)
+	      (local-set-key (kbd "C-c t a") 'python-pytest-vterm-all)
+	      (local-set-key (kbd "C-c t f") 'python-pytest-vterm-file)
+	      (local-set-key (kbd "C-c t t") 'python-pytest-vterm-function)
 	      )))
 
 (add-hook 'python-mode-hook
