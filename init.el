@@ -98,13 +98,13 @@
   (setq auto-mode-alist (cons '("\\.js[mx]?\\'" . js2-mode) auto-mode-alist)))
 
 
-(use-package jest
-  :after (js2-mode)
-  :init
-  (add-hook 'js2-mode-hook
-	    (lambda () (interactive)
-	      (jest-minor-mode)
-	      (local-set-key (kbd "C-c t f") 'jest-popup))))
+;; (use-package jest
+;;   :after (js2-mode)
+;;   :init
+;;   (add-hook 'js2-mode-hook
+;; 	    (lambda () (interactive)
+;; 	      (jest-minor-mode)
+;; 	      (local-set-key (kbd "C-c t f") 'jest-popup))))
 
 ;; Python
 
@@ -125,83 +125,19 @@
   :config
   (add-hook 'python-mode-hook 'anaconda-mode))
 
-(use-package blacken
-  :ensure t)
-
-(use-package vterm
-  :ensure t
-  :init
-  ;; Toggle copy mode keybinding: C-c C-t
-  (add-hook 'vterm-mode-hook
-          (function (lambda ()
-		      (message "Hooked")
-                      (local-set-key (kbd "C-M-h") 'windmove-left)
-                      (local-set-key (kbd "C-M-l") 'windmove-right)
-                      (local-set-key (kbd "C-M-k") 'windmove-up)
-                      (local-set-key (kbd "C-M-j") 'windmove-down))))
-  (cl-defun python-pytest--run-command-in-vterm (&key command edit)
-    (let 
-	(
-	 (long-command
-	  (concat
-	   "cd "
-	   (python-pytest--project-root)
-	   " && PYTHONBREAKPOINT=\"pudb.set_trace\" "
-	   command
-	   )
-	  )
-	 )
-      (message "Running test in vterm with the command: %s" long-command)
-      (vterm)
-      (vterm-send-string long-command)
-      (vterm-send-return)
-      )
-    )
-
-  (defun python-pytest-vterm-wrapper (pytest-fname)
-    (put 'python-pytest-vterm 'interactive-form (interactive-form pytest-fname))
-    (put 'python-pytest-vterm 'pytest-fun pytest-fname)
-    (call-interactively 'python-pytest-vterm pytest-fname)
-    )
-
-  (defun python-pytest-vterm-function ()
-    (interactive)
-    (python-pytest-vterm-wrapper 'python-pytest-function)
-    )
-
-  (defun python-pytest-vterm-file ()
-    (interactive)
-    (python-pytest-vterm-wrapper 'python-pytest-file)
-    )
-
-  (defun python-pytest-vterm-all ()
-    (interactive)
-    (python-pytest-vterm-wrapper 'python-pytest)
-    )
-
-  (defun python-pytest-vterm (&rest args)
-    (
-     advice-add
-     'python-pytest--run-command
-     :override
-     #'python-pytest--run-command-in-vterm
-     )
-    (apply (get 'python-pytest-vterm 'pytest-fun) args)
-    (advice-remove 'python-pytest--run-command #'python-pytest--run-command-in-vterm)
-    )
-  )
+(use-package python-black
+  :demand t
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
 (use-package python-pytest
   :ensure t
   :init
   (add-hook 'python-mode-hook
 	    (lambda ()
-	      ;; (local-set-key (kbd "C-c t a") 'python-pytest)
-	      ;; (local-set-key (kbd "C-c t f") 'python-pytest-file)
-	      ;; (local-set-key (kbd "C-c t t") 'python-pytest-function)
-	      (local-set-key (kbd "C-c t a") 'python-pytest-vterm-all)
-	      (local-set-key (kbd "C-c t f") 'python-pytest-vterm-file)
-	      (local-set-key (kbd "C-c t t") 'python-pytest-vterm-function)
+	      (local-set-key (kbd "C-c t a") 'python-pytest)
+	      (local-set-key (kbd "C-c t f") 'python-pytest-file)
+	      (local-set-key (kbd "C-c t t") 'python-pytest-function)
 	      )))
 
 (add-hook 'python-mode-hook
@@ -272,7 +208,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(vterm jest js2-mode po-mode vue-mode flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode)))
+   '(python-black jest js2-mode po-mode vue-mode flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode))
+ '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
