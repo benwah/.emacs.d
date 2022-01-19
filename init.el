@@ -130,6 +130,13 @@
   :after python
   :hook (python-mode . python-black-on-save-mode-enable-dwim))
 
+(use-package python-isort
+  :demand t
+  :after python
+  :hook (python-mode . python-isort-on-save-mode))
+
+(require 'python-isort)
+
 (use-package python-pytest
   :ensure t
   :init
@@ -208,7 +215,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(python-black jest js2-mode po-mode vue-mode flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode))
+   '(python-isort python-black vterm jest js2-mode po-mode vue-mode flycheck helm-ag yaml-mode use-package solarized-theme smart-cursor-color rainbow-mode python-pytest pyenv-mode monokai-theme material-theme markdown-mode magit helm-projectile fill-column-indicator exec-path-from-shell doom-themes cyberpunk-theme color-theme-sanityinc-tomorrow blacken anaconda-mode))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
