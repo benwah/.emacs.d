@@ -25,10 +25,7 @@
   "Initialize packages."
 
   ;; el-get
-  (el-get-bundle anaconda-mode)
-  (el-get-bundle company-anaconda)
-  (el-get-bundle company-mode
-    (global-company-mode))
+  (el-get-bundle elpy)
   (el-get-bundle dash)
   (el-get-bundle exec-path-from-shell)
   (el-get-bundle flycheck

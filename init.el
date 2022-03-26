@@ -111,6 +111,7 @@
 	      (local-set-key (kbd "C-c t f") 'jest-popup))))
 
 (defun ben-python-config ()
+  (elpy-enable)
   (defun ben-python-hook ()
     ;; Settings
     (set-fill-column 88)
@@ -122,7 +123,6 @@
     (python-isort-on-save-mode)
     (python-black-on-save-mode-enable-dwim)
     (pyenv-mode)
-    (anaconda-mode)
     (setq-default fill-column 88)
 
     ;; Key bindings
