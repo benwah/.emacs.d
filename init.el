@@ -129,10 +129,6 @@
     (local-set-key (kbd "C-c t a") 'python-pytest)
     (local-set-key (kbd "C-c t f") 'python-pytest-file)
     (local-set-key (kbd "C-c t t") 'python-pytest-function)
-    ;; Insert PDB
-    (local-set-key
-     (kbd "M-p")
-     '(lambda nil (interactive) (insert "import pdb; pdb.set_trace()\n")))
     )
 
   (add-to-list 'company-backends 'company-anaconda)
