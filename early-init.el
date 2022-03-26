@@ -26,7 +26,6 @@
 
   ;; el-get
   (el-get-bundle elpy)
-  (el-get-bundle dash)
   (el-get-bundle exec-path-from-shell)
   (el-get-bundle flycheck
     (global-flycheck-mode))
@@ -35,7 +34,6 @@
   (el-get-bundle python-black)
   (el-get-bundle python-isort)
   (el-get-bundle python-pytest)
-  (el-get-bundle pythonic)
   (el-get-bundle rainbow-mode
     (add-hook 'css-mode-hook
               (lambda()
