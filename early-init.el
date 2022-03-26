@@ -26,6 +26,8 @@
 
   ;; el-get
   (el-get-bundle elpy)
+  (el-get-bundle company-mode)
+  (el-get-bundle sublimity)
   (el-get-bundle exec-path-from-shell)
   (el-get-bundle markdown-mode)
   (el-get-bundle pyenv-mode)

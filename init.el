@@ -50,9 +50,17 @@
    kept-old-versions 2
    version-control t)                                      ; use versioned backups
 
+  (global-company-mode)
+
+  ;; Sulimity provides smooth scroll and minimap
+  (require 'sublimity)
+  (require 'sublimity-map)
+  (sublimity-map-set-delay nil)
+  (sublimity-mode 1)
+
   ;; Theme
   (load-theme 'cyberpunk t)
-  (set-face-attribute 'default nil :height 130 :family "Fira Code")
+  (set-face-attribute 'default nil :height 100 :family "Fira Code")
   )
 
 
@@ -145,14 +153,13 @@
   (ben-mac-os-only))
 
 (add-hook 'after-init-hook 'main)
-
-
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(jest magit rainbow-mode smart-cursor-color)))
+ '(package-selected-packages
+   '(cyberpunk-theme magit jest smart-cursor-color rainbow-mode python-pytest python-isort pyenv-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
