@@ -67,6 +67,7 @@
   (global-set-key (kbd "C-c H") 'hs-hide-all)
   (global-set-key (kbd "C-c s") 'hs-show-block)
   (global-set-key (kbd "C-c h") 'hs-hide-block)
+  (global-set-key (kbd "C-<tab>") 'hs-toggle-hiding)
 
   (global-set-key (kbd "C-M-h") 'windmove-left)
   (global-set-key (kbd "C-M-l") 'windmove-right)
@@ -123,6 +124,7 @@
     (python-isort-on-save-mode)
     (python-black-on-save-mode-enable-dwim)
     (pyenv-mode)
+    (hs-minor-mode)
     (setq-default fill-column 88)
 
     ;; Key bindings
@@ -131,7 +133,6 @@
     (local-set-key (kbd "C-c t t") 'python-pytest-function)
     )
 
-  (add-to-list 'company-backends 'company-anaconda)
   (add-hook 'python-mode-hook 'ben-python-hook)
 )
 
