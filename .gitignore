@@ -41,3 +41,9 @@ session.*
 network-security.data
 anaconda-mode
 transient
+ac-comphist.dat
+el-get/
+eln-cache/
+games/
+projects
+tutorial/
