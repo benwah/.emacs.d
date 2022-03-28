@@ -121,6 +121,11 @@
 
 (defun ben-python-config ()
   (elpy-enable)
+  (when (load "flycheck" t t)
+    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+    (add-hook 'elpy-mode-hook 'flycheck-mode))
+
+
   (defun ben-python-hook ()
     ;; Settings
     (set-fill-column 88)
@@ -144,12 +149,16 @@
   (add-hook 'python-mode-hook 'ben-python-hook)
 )
 
+(defun ben-setup-flycheck ()
+  (global-flycheck-mode))
+
 (defun init-package-config ()
   "Configure individual packages"
   (ben-setup-projectile)
   (ben-comint-mode)
   (ben-javascript-config)
   (ben-python-config)
+  (ben-setup-flycheck)
   (ben-mac-os-only))
 
 (add-hook 'after-init-hook 'main)
