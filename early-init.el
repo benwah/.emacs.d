@@ -31,7 +31,7 @@
   (el-get-bundle sublimity)
   (el-get-bundle exec-path-from-shell)
   (el-get-bundle markdown-mode)
-  (el-get-bundle pyenv-mode)
+  (el-get-bundle poetry)
   (el-get-bundle python-black)
   (el-get-bundle python-isort)
   (el-get-bundle python-pytest)

@@ -120,6 +120,7 @@
 	      (local-set-key (kbd "C-c t f") 'jest-popup))))
 
 (defun ben-python-config ()
+  (require 'poetry)
   (elpy-enable)
   (when (load "flycheck" t t)
     (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
@@ -133,10 +134,10 @@
     (setq tab-width 4)
 
     ;; Modes
+    (poetry-tracking-mode)
     (display-fill-column-indicator-mode)
     (python-isort-on-save-mode)
     (python-black-on-save-mode-enable-dwim)
-    (pyenv-mode)
     (hs-minor-mode)
     (setq-default fill-column 88)
 
@@ -168,7 +169,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(cyberpunk-theme magit jest smart-cursor-color rainbow-mode python-pytest python-isort pyenv-mode)))
+   '(poetry cyberpunk-theme magit jest smart-cursor-color rainbow-mode python-pytest python-isort)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
