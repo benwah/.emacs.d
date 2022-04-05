@@ -52,12 +52,6 @@
 
   (global-company-mode)
 
-  ;; Sulimity provides smooth scroll and minimap
-  (require 'sublimity)
-  (require 'sublimity-map)
-  (sublimity-map-set-delay nil)
-  (sublimity-mode 1)
-
   ;; Theme
   (load-theme 'cyberpunk t)
   (set-face-attribute 'default nil :height 100 :family "Fira Code")
@@ -121,7 +115,14 @@
 
 (defun ben-python-config ()
   (require 'poetry)
+
+  ;; Make elpy work properly.
+  (setq elpy-rpc-virtualenv-path 'current)
   (elpy-enable)
+  (add-hook 'pyvenv-post-activate-hooks
+	    (lambda ()
+	      (setq elpy-rpc-python-command (format "%s/bin/python" python-shell-virtualenv-path))))
+
   (poetry-tracking-mode)
   (when (load "flycheck" t t)
     (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
