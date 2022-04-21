@@ -101,11 +101,6 @@
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 
 
-(defun ben-mac-os-only ()
-  (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize)))
-
-
 (defun ben-javascript-config ()
   (setq auto-mode-alist (cons '("\\.js[mx]?\\'" . js2-mode) auto-mode-alist))
   (add-hook 'js2-mode-hook
@@ -156,12 +151,12 @@
 
 (defun init-package-config ()
   "Configure individual packages"
+  (exec-path-from-shell-initialize)
   (ben-setup-projectile)
   (ben-comint-mode)
   (ben-javascript-config)
   (ben-python-config)
-  (ben-setup-flycheck)
-  (ben-mac-os-only))
+  (ben-setup-flycheck))
 
 (add-hook 'after-init-hook 'main)
 (custom-set-variables
