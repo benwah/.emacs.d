@@ -149,9 +149,28 @@
 (defun ben-setup-flycheck ()
   (global-flycheck-mode))
 
+(defun ben-setup-wl-clipboard ()
+  (unless window-system
+    (setq wl-copy-process nil)
+    (defun wl-copy (text)
+      (setq wl-copy-process (make-process :name "wl-copy"
+                                          :buffer nil
+                                          :command '("wl-copy" "-f" "-n")
+                                          :connection-type 'pipe))
+      (process-send-string wl-copy-process text)
+      (process-send-eof wl-copy-process))
+    (defun wl-paste ()
+      (if (and wl-copy-process (process-live-p wl-copy-process))
+          nil ; should return nil if we're the current paste owner
+        (shell-command-to-string "wl-paste -n | tr -d \r")))
+    (setq interprogram-cut-function 'wl-copy)
+    (setq interprogram-paste-function 'wl-paste))
+)
+
 (defun init-package-config ()
   "Configure individual packages"
   (exec-path-from-shell-initialize)
+  (ben-setup-wl-clipboard)
   (ben-setup-projectile)
   (ben-comint-mode)
   (ben-javascript-config)
@@ -165,7 +184,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(helm-ag poetry cyberpunk-theme magit jest smart-cursor-color rainbow-mode python-pytest python-isort)))
+   '(go-mode go-autocomplete tide helm-ag poetry cyberpunk-theme magit jest smart-cursor-color rainbow-mode python-pytest python-isort)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
