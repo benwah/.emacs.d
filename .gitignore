@@ -48,3 +48,9 @@ games/
 projects
 tutorial/
 elpy/
+
+.cache
+straight/build-cache.el
+straight/build
+straight/repos
+custom.el
