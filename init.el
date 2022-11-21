@@ -44,6 +44,9 @@
   (straight-use-package 'tide)
   (straight-use-package 'web-mode)
   (straight-use-package 'cython-mode)
+  (straight-use-package 'inf-ruby)
+  (straight-use-package 'ruby-mode)
+  (straight-use-package 'flymake-ruby)
   (straight-use-package 'robe-mode)
   (straight-use-package 'srcery-theme)
   )
@@ -79,7 +82,13 @@
   (setq-default
    smerge-command-prefix (kbd "C-c v")
    js2-basic-offset 2
-   js-indent-level 2)
+   typescript-indent-level 2
+   js-jsx-indent-level 2
+   js-indent-level 2
+   web-mode-markup-indent-offset 2
+   web-mode-code-indent-offset 2
+   web-mode-css-indent-offset 2)
+
   (setq
    inhibit-startup-screen t
    require-final-newline nil
@@ -96,7 +105,8 @@
 
   ;; Theme
   (load-theme 'srcery t)
-  (set-frame-parameter nil 'alpha-background 70)
+  (set-frame-parameter nil 'alpha-background 90)
+  (set-face-attribute 'default (selected-frame) :height 90)
   )
 
 
@@ -143,6 +153,7 @@
     (tide-setup)
     (flycheck-mode +1)
     (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (setq tide-format-options '(:indentSize 2))
     (eldoc-mode +1)
     (tide-hl-identifier-mode +1)
     ;; company is an optional dependency. You have to
@@ -202,6 +213,30 @@
   (add-hook 'python-mode-hook 'ben-python-hook))
 
 
+(defun ben-ruby-config ()
+  (setq
+   robe-ruby-path (expand-file-name "~/.emacs.d/straight/repos/robe/lib")
+   ruby-indent-tabs-mode nil
+   ruby-insert-encoding-magic-comment nil
+   ruby-insert-encoding-magic-comment nil
+   ruby-deep-indent-paren nil
+   flycheck-checker-error-threshold 800)
+
+  (add-to-list 'auto-mode-alist
+               '("\\.\\(?:gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'" . ruby-mode))
+  (add-to-list 'auto-mode-alist
+               '("\\(Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'" . ruby-mode))
+  (add-hook 'ruby-mode-hook
+            (lambda()
+              (setq-default indent-tabs-mode nil)
+              (flycheck-mode)
+              (flymake-ruby-load)
+              (hs-minor-mode)
+              (whitespace-mode)
+              (set-fill-column 120)
+              (robe-mode))))
+
+
 (defun ben-setup-flycheck ()
   (global-flycheck-mode))
 
@@ -229,8 +264,7 @@
   (add-hook 'css-mode-hook
             (lambda()
 	      (rainbow-mode 1)
-	      (set-fill-column 120)
-	      (fci-mode t)))
+	      (set-fill-column 120)))
 
   (add-hook 'comint-mode-hook
             (function (lambda () 
@@ -253,6 +287,7 @@
   (ben-setup-projectile)
   (ben-javascript-config)
   (ben-python-config)
+  (ben-ruby-config)
   (ben-setup-flycheck)
   (ben-setup-misc)
   (ben-setup-custom-functions)
