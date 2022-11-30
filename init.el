@@ -8,6 +8,9 @@
 
 ;;; Packages:
 
+;; This has to be before we require lsp-mode.
+(setq lsp-keymap-prefix "C-c l")
+
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
@@ -23,15 +26,11 @@
 
 (defun install-packages ()
   (straight-use-package 'magit)
-  (straight-use-package 'elpy)
-  (straight-use-package 'flycheck)
-  (straight-use-package 'company-mode)
   (straight-use-package 'exec-path-from-shell)
   (straight-use-package 'markdown-mode)
+  (straight-use-package 'python-mode)
   (straight-use-package 'python-black)
   (straight-use-package 'python-isort)
-  (straight-use-package 'python-pytest)
-  (straight-use-package 'poetry)
   (straight-use-package 'rainbow-mode)
   (straight-use-package 'smart-cursor-color)
   (straight-use-package 'yaml-mode)
@@ -39,23 +38,29 @@
   (straight-use-package 'helm-ag)
   (straight-use-package 'projectile)
   (straight-use-package 'helm-projectile)
-  (straight-use-package 'js2-mode)
-  (straight-use-package 'jest)
-  (straight-use-package 'tide)
-  (straight-use-package 'web-mode)
-  (straight-use-package 'cython-mode)
-  (straight-use-package 'inf-ruby)
-  (straight-use-package 'ruby-mode)
-  (straight-use-package 'flymake-ruby)
-  (straight-use-package 'robe-mode)
+  (straight-use-package 'auto-virtualenv)
+  (straight-use-package 'yasnippet)
+  ;; (straight-use-package 'js2-mode)
+  ;; (straight-use-package 'jest)
+  ;; (straight-use-package 'tide)
+  ;; (straight-use-package 'web-mode)
+  ;; (straight-use-package 'cython-mode)
+  ;; (straight-use-package 'inf-ruby)
+  ;; (straight-use-package 'ruby-mode)
+  ;; (straight-use-package 'flymake-ruby)
+  ;; (straight-use-package 'robe-mode)
   (straight-use-package 'srcery-theme)
-  )
 
-(defun main ()
-  (install-packages)
-  (init-emacs-ui)
-  (init-key-bindings)
-  (init-package-config)
+  ;; LSP packages
+  (straight-use-package 'lsp-mode)
+  (straight-use-package 'lsp-ui)
+  (straight-use-package 'flycheck)
+  (straight-use-package '(company-mode :files (:defaults "icons")))
+  (straight-use-package 'lsp-treemacs)
+  (straight-use-package 'lsp-ivy)
+  (straight-use-package 'dap-mode)
+  (straight-use-package 'lsp-jedi)
+  (straight-use-package 'pyvenv)
   )
 
 ;; Init UI and features
@@ -178,19 +183,30 @@
   )
 
 (defun ben-python-config ()
-  (require 'poetry)
+  (require 'auto-virtualenv)
+  (require 'lsp-mode)
+  (require 'lsp-ui)
+  (require 'lsp-jedi)
+  (require 'dap-python)
 
-  ;; Make elpy work properly.
-  (setq elpy-rpc-virtualenv-path 'current)
-  (elpy-enable)
-  (add-hook 'pyvenv-post-activate-hooks
-	    (lambda ()
-	      (setq elpy-rpc-python-command (format "%s/bin/python" python-shell-virtualenv-path))))
+  ;; Override function that incorrectly uses pyenv.
+  (defun dap-python--pyenv-executable-find (command) (executable-find command))
 
-  (poetry-tracking-mode)
-  (when (load "flycheck" t t)
-    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-    (add-hook 'elpy-mode-hook 'flycheck-mode))
+  (setq lsp-auto-configure t)
+  (setq lsp-ui-sideline-show-hover nil)
+  (setq lsp-ui-peek-enable t)
+  (setq lsp-ui-peek-show-directory t)
+  (setq lsp-ui-imenu-auto-refresh t)
+  (setq dap-python-debugger 'debugpy)
+
+  (add-to-list 'lsp-disabled-clients 'pyls)
+  (add-to-list 'lsp-enabled-clients 'jedi)
+
+  (defun configure-python-paths ()
+    (auto-virtualenv-set-virtualenv)
+    (setq dap-python-executable (concat pyvenv-virtual-env "bin/python"))
+    (setq lsp-jedi-executable-command (concat pyvenv-virtual-env "bin/jedi-language-server"))
+    )
 
   (defun ben-python-hook ()
     ;; Settings
@@ -205,12 +221,41 @@
     (hs-minor-mode)
     (setq-default fill-column 88)
 
+
     ;; Key bindings
-    (local-set-key (kbd "C-c t a") 'python-pytest)
-    (local-set-key (kbd "C-c t f") 'python-pytest-file)
-    (local-set-key (kbd "C-c t t") 'python-pytest-function)
+    (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+    (local-set-key (kbd "C-c t t") (lambda () (interactive) (dap-debug (dap-python--template "pytest-this-test"))))
+    (local-set-key (kbd "C-c t f") (lambda () (interactive) (dap-debug (dap-python--template "Python :: Run pytest (buffer)"))))
+    (local-set-key (kbd "C-c t a") (lambda () (interactive) (dap-debug (dap-python--template "pytest-all"))))
     )
-  (add-hook 'python-mode-hook 'ben-python-hook))
+
+  (defun ben-setup-lsp ()
+    (add-hook 'python-mode-hook #'lsp)
+    (dap-register-debug-template "pytest-this-test"
+				 (list :type "python-test-at-point"
+                                       :args ""
+                                       :program nil
+                                       :module "pytest"
+                                       :request "launch"
+                                       :name "pytest-this-test"))
+    (dap-register-debug-template "pytest-all"
+				 (list :type "python"
+                                       :args ""
+                                       :program nil
+				       :cwd "${workspaceFolder}"
+				       :target-module ""
+                                       :module "pytest"
+                                       :request "launch"
+                                       :name "pytest-all")))
+
+
+  (add-hook 'python-mode-hook 'configure-python-paths)
+  (ben-setup-lsp)
+  (add-hook 'python-mode-hook 'ben-python-hook)
+  (add-hook 'window-configuration-change-hook 'configure-python-paths)
+  (add-hook 'projectile-after-switch-project-hook 'configure-python-paths)
+  (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra)))
+  )
 
 
 (defun ben-ruby-config ()
@@ -285,12 +330,19 @@
   (exec-path-from-shell-initialize)
   (ben-setup-wl-clipboard)
   (ben-setup-projectile)
-  (ben-javascript-config)
+  ;; (ben-javascript-config)
   (ben-python-config)
-  (ben-ruby-config)
-  (ben-setup-flycheck)
+  ;; (ben-ruby-config)
+  ;; (ben-setup-flycheck)
   (ben-setup-misc)
   (ben-setup-custom-functions)
+  )
+
+(defun main ()
+  (install-packages)
+  (init-emacs-ui)
+  (init-key-bindings)
+  (init-package-config)
   )
 
 (add-hook 'after-init-hook 'main)
