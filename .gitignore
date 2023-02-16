@@ -54,3 +54,7 @@ straight/build-cache.el
 straight/build
 straight/repos
 custom.el
+.dap-breakpoints
+.lsp-session*
+image-dired
+projectile.cache

@@ -28,6 +28,7 @@
   (straight-use-package 'magit)
   (straight-use-package 'exec-path-from-shell)
   (straight-use-package 'markdown-mode)
+  (straight-use-package 'go-mode)
   (straight-use-package 'python-mode)
   (straight-use-package 'python-black)
   (straight-use-package 'python-isort)
@@ -41,9 +42,9 @@
   (straight-use-package 'auto-virtualenv)
   (straight-use-package 'yasnippet)
   ;; (straight-use-package 'js2-mode)
+  (straight-use-package 'typescript-mode)
   ;; (straight-use-package 'jest)
-  ;; (straight-use-package 'tide)
-  ;; (straight-use-package 'web-mode)
+  (straight-use-package 'web-mode)
   ;; (straight-use-package 'cython-mode)
   ;; (straight-use-package 'inf-ruby)
   ;; (straight-use-package 'ruby-mode)
@@ -143,6 +144,7 @@
 
 (defun ben-setup-projectile ()
   "Customize projectile"
+  ;; NOTE!!! Use a .projectile file to force a project root.
   (setq projectile-completion-system 'helm)
 
   (projectile-global-mode)
@@ -153,54 +155,56 @@
 
 
 (defun ben-javascript-config ()
-  (defun setup-tide-mode ()
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (setq flycheck-check-syntax-automatically '(save mode-enabled))
-    (setq tide-format-options '(:indentSize 2))
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-    ;; company is an optional dependency. You have to
-    ;; install it separately via package-install
-    ;; `M-x package-install [ret] company`
-    (company-mode +1))
+  (setq web-mode-markup-indent-offset 2)
+  (setq lsp-enable-indentation nil)
 
-  ;; aligns annotation to the right hand side
-  (setq company-tooltip-align-annotations t)
-
-  ;; formats the buffer before saving
-  (add-hook 'before-save-hook 'tide-format-before-save)
-
-  (add-hook 'typescript-mode-hook #'setup-tide-mode)
-
-  (require 'web-mode)
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . javascript-mode))
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
   (add-to-list 'auto-mode-alist '("\\.tsx\\'" . web-mode))
-  (add-hook 'web-mode-hook
-	    (lambda ()
-	      (when (string-equal "tsx" (file-name-extension buffer-file-name))
-		(setup-tide-mode))))
+  (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.json\\'" . web-mode))
+  (add-to-list 'lsp-enabled-clients 'ts-ls)
+
+  (add-hook 'typescript-mode-hook #'lsp)
+  (add-hook 'web-mode-hook #'lsp)
   )
 
-(defun ben-python-config ()
-  (require 'auto-virtualenv)
+
+(defun ben-lsp-common-config ()
   (require 'lsp-mode)
   (require 'lsp-ui)
-  (require 'lsp-jedi)
-  (require 'dap-python)
-
-  ;; Override function that incorrectly uses pyenv.
-  (defun dap-python--pyenv-executable-find (command) (executable-find command))
 
   (setq lsp-auto-configure t)
   (setq lsp-ui-sideline-show-hover nil)
   (setq lsp-ui-peek-enable t)
   (setq lsp-ui-peek-show-directory t)
   (setq lsp-ui-imenu-auto-refresh t)
-  (setq dap-python-debugger 'debugpy)
+)
+
+(defun ben-setup-yas-config ()
+  (yas-global-mode)
+  )
+
+(defun ben-python-config ()
+  (require 'auto-virtualenv)
+  (require 'lsp-jedi)
+  (require 'dap-python)
+
+  ;; Override function that incorrectly uses pyenv.
+  (defun dap-python--pyenv-executable-find (command) (executable-find command))
+
+  (setq 
+   lsp-pylsp-plugins-pylint-enabled t
+   lsp-pylsp-plugins-black-enabled t
+   lsp-pylsp-plugins-pycodestyle-enabled nil
+   lsp-pylsp-plugins-flake8-enabled nil
+   dap-python-debugger 'debugpy
+   )
 
   (add-to-list 'lsp-disabled-clients 'pyls)
-  (add-to-list 'lsp-enabled-clients 'jedi)
+  (add-to-list 'lsp-disabled-clients 'jedi)
+  (add-to-list 'lsp-enabled-clients 'pylsp)
 
   (defun configure-python-paths ()
     (auto-virtualenv-set-virtualenv)
@@ -217,7 +221,7 @@
     ;; Modes
     (display-fill-column-indicator-mode)
     (python-isort-on-save-mode)
-    (python-black-on-save-mode-enable-dwim)
+    ;; (python-black-on-save-mode-enable-dwim)
     (hs-minor-mode)
     (setq-default fill-column 88)
 
@@ -227,7 +231,7 @@
     (local-set-key (kbd "C-c t t") (lambda () (interactive) (dap-debug (dap-python--template "pytest-this-test"))))
     (local-set-key (kbd "C-c t f") (lambda () (interactive) (dap-debug (dap-python--template "Python :: Run pytest (buffer)"))))
     (local-set-key (kbd "C-c t a") (lambda () (interactive) (dap-debug (dap-python--template "pytest-all"))))
-    )
+    (local-set-key (kbd "C-c t b") (lambda () (interactive) (dap-breakpoint-toggle))))
 
   (defun ben-setup-lsp ()
     (add-hook 'python-mode-hook #'lsp)
@@ -255,6 +259,26 @@
   (add-hook 'window-configuration-change-hook 'configure-python-paths)
   (add-hook 'projectile-after-switch-project-hook 'configure-python-paths)
   (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra)))
+  )
+
+(defun ben-go-config ()
+  ;; Company mode
+  (setq company-idle-delay 0)
+  (setq company-minimum-prefix-length 1)
+  (add-to-list 'lsp-enabled-clients 'gopls)
+
+  ;; Go - lsp-mode
+  ;; Set up before-save hooks to format buffer and add/delete imports.
+  (defun lsp-go-install-save-hooks ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t))
+  (add-hook 'go-mode-hook #'lsp-go-install-save-hooks)
+
+  ;; Start LSP Mode and YASnippet mode
+  (add-hook 'go-mode-hook #'lsp-deferred)
+  (add-hook 'go-mode-hook #'yas-minor-mode)
+  (add-hook 'go-mode-hook #'whitespace-mode)
+  (add-hook 'go-mode-hook (lambda () (setq-local tab-width 4)))
   )
 
 
@@ -328,10 +352,13 @@
 (defun init-package-config ()
   "Configure individual packages"
   (exec-path-from-shell-initialize)
+  (ben-setup-yas-config)
   (ben-setup-wl-clipboard)
   (ben-setup-projectile)
-  ;; (ben-javascript-config)
+  (ben-lsp-common-config)
+  (ben-javascript-config)
   (ben-python-config)
+  (ben-go-config)
   ;; (ben-ruby-config)
   ;; (ben-setup-flycheck)
   (ben-setup-misc)
@@ -346,3 +373,4 @@
   )
 
 (add-hook 'after-init-hook 'main)
+(put 'upcase-region 'disabled nil)
