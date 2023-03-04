@@ -28,10 +28,6 @@
   (straight-use-package 'magit)
   (straight-use-package 'exec-path-from-shell)
   (straight-use-package 'markdown-mode)
-  (straight-use-package 'go-mode)
-  (straight-use-package 'python-mode)
-  (straight-use-package 'python-black)
-  (straight-use-package 'python-isort)
   (straight-use-package 'rainbow-mode)
   (straight-use-package 'smart-cursor-color)
   (straight-use-package 'yaml-mode)
@@ -40,6 +36,18 @@
   (straight-use-package 'projectile)
   (straight-use-package 'helm-projectile)
   (straight-use-package 'auto-virtualenv)
+
+  ;; Go
+  (straight-use-package 'go-mode)
+  (straight-use-package 'flycheck-golangci-lint)
+  
+  ;; Rust
+  (straight-use-package 'rust-mode)
+
+  ;; Python
+  (straight-use-package 'python-mode)
+  (straight-use-package 'python-black)
+  (straight-use-package 'python-isort)
   (straight-use-package 'yasnippet)
   ;; (straight-use-package 'js2-mode)
   (straight-use-package 'typescript-mode)
@@ -191,20 +199,53 @@
   (require 'lsp-jedi)
   (require 'dap-python)
 
+
+  (defcustom lsp-ruff-executable "ruff-lsp"
+    "Command to start the Ruff language server."
+    :group 'lsp-python
+    :risky t
+    :type 'file)
+
+  ;; Register ruff-lsp with the LSP client.
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection (lambda () (list lsp-ruff-executable)))
+    :activation-fn (lsp-activate-on "python")
+    :add-on? t
+    :server-id 'ruff
+    :initialization-options (lambda ()
+                              (list :settings
+                                    (cl-list*
+                                     (when
+					 pyvenv-virtual-env
+                                       (list
+                                        :interpreter (vector (f-join (f-long pyvenv-virtual-env) "bin" "python3"))
+                                        :workspace (f-long pyvenv-virtual-env)
+                                        :path (vector (f-join (f-long pyvenv-virtual-env) "bin" "ruff")))
+                                       )
+                                     ))
+                              )))
+
   ;; Override function that incorrectly uses pyenv.
   (defun dap-python--pyenv-executable-find (command) (executable-find command))
 
   (setq 
-   lsp-pylsp-plugins-pylint-enabled t
-   lsp-pylsp-plugins-black-enabled t
-   lsp-pylsp-plugins-pycodestyle-enabled nil
+   lsp-pylsp-plugins-autopep8-enabled nil
+   lsp-pylsp-plugins-black-enabled nil
    lsp-pylsp-plugins-flake8-enabled nil
+   lsp-pylsp-plugins-jedi-completion-enabled t
+   lsp-pylsp-plugins-mccabe-enabled nil
+   lsp-pylsp-plugins-preload-enabled nil
+   lsp-pylsp-plugins-pycodestyle-enabled nil
+   lsp-pylsp-plugins-pydocstyle-enabled nil
+   lsp-pylsp-plugins-pylint-enabled nil
    dap-python-debugger 'debugpy
    )
 
   (add-to-list 'lsp-disabled-clients 'pyls)
   (add-to-list 'lsp-disabled-clients 'jedi)
   (add-to-list 'lsp-enabled-clients 'pylsp)
+  (add-to-list 'lsp-enabled-clients 'ruff)
 
   (defun configure-python-paths ()
     (auto-virtualenv-set-virtualenv)
@@ -221,7 +262,7 @@
     ;; Modes
     (display-fill-column-indicator-mode)
     (python-isort-on-save-mode)
-    ;; (python-black-on-save-mode-enable-dwim)
+    (python-black-on-save-mode-enable-dwim)
     (hs-minor-mode)
     (setq-default fill-column 88)
 
@@ -263,8 +304,11 @@
 
 (defun ben-go-config ()
   ;; Company mode
-  (setq company-idle-delay 0)
-  (setq company-minimum-prefix-length 1)
+  (setq
+   company-minimum-prefix-length 1
+   whitespace-line-column 200
+   lsp-prefer-flymake nil
+   company-idle-delay 0)
   (add-to-list 'lsp-enabled-clients 'gopls)
 
   ;; Go - lsp-mode
@@ -279,6 +323,26 @@
   (add-hook 'go-mode-hook #'yas-minor-mode)
   (add-hook 'go-mode-hook #'whitespace-mode)
   (add-hook 'go-mode-hook (lambda () (setq-local tab-width 4)))
+  )
+
+(defun ben-rust-config ()
+  ;; Company mode
+  (setq
+   company-minimum-prefix-length 1
+   whitespace-line-column 200
+   lsp-prefer-flymake nil
+   company-idle-delay 0)
+  (add-to-list 'lsp-enabled-clients 'rust-analyzer)
+
+  ;; Go - lsp-mode
+  ;; Set up before-save hooks to format buffer and add/delete imports.
+  (defun lsp-go-install-save-hooks ()
+    (add-hook 'before-save-hook #'lsp-format-buffer t t)
+    (add-hook 'before-save-hook #'lsp-organize-imports t t))
+
+  ;; Start LSP Mode and YASnippet mode
+  (add-hook 'rust-mode-hook #'lsp-deferred)
+  (add-hook 'rust-mode-hook #'yas-minor-mode)
   )
 
 
@@ -359,6 +423,7 @@
   (ben-javascript-config)
   (ben-python-config)
   (ben-go-config)
+  (ben-rust-config)
   ;; (ben-ruby-config)
   ;; (ben-setup-flycheck)
   (ben-setup-misc)
