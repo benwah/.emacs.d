@@ -113,7 +113,8 @@
    delete-old-versions t
    kept-new-versions 6
    kept-old-versions 2
-   version-control t)                                      ; use versioned backups
+   version-control t                                       ; use versioned backups
+   explicit-shell-file-name "/bin/bash")
 
   (global-company-mode)
 
@@ -373,23 +374,39 @@
 (defun ben-setup-flycheck ()
   (global-flycheck-mode))
 
-(defun ben-setup-wl-clipboard ()
-  (unless window-system
-    (setq wl-copy-process nil)
-    (defun wl-copy (text)
-      (setq wl-copy-process (make-process :name "wl-copy"
-                                          :buffer nil
-                                          :command '("wl-copy" "-f" "-n")
-                                          :connection-type 'pipe))
-      (process-send-string wl-copy-process text)
-      (process-send-eof wl-copy-process))
-    (defun wl-paste ()
-      (if (and wl-copy-process (process-live-p wl-copy-process))
-          nil ; should return nil if we're the current paste owner
-        (shell-command-to-string "wl-paste -n | tr -d \r")))
-    (setq interprogram-cut-function 'wl-copy)
-    (setq interprogram-paste-function 'wl-paste))
+(defun ben-setup-clipboard ()
+  (if (not (display-graphic-p))
+      (cond 
+       ((eq system-type 'gnu/linux)
+	(setq wl-copy-process nil)
+	(defun wl-copy (text)
+	  (setq wl-copy-process (make-process :name "wl-copy"
+					      :buffer nil
+					      :command '("wl-copy" "-f" "-n")
+					      :connection-type 'pipe))
+	  (process-send-string wl-copy-process text)
+	  (process-send-eof wl-copy-process))
+	(defun wl-paste ()
+	  (if (and wl-copy-process (process-live-p wl-copy-process))
+	      nil ; should return nil if we're the current paste owner
+            (shell-command-to-string "wl-paste -n | tr -d \r")))
+	(setq interprogram-cut-function 'wl-copy)
+	(setq interprogram-paste-function 'wl-paste)
+        )
+       ((eq system-type 'darwin)
+	(defun copy-from-osx ()
+	  (shell-command-to-string "pbpaste"))
+
+	(defun paste-to-osx (text &optional push)
+	  (let ((process-connection-type nil))
+	    (let ((proc (start-process "pbcopy" "*Messages*" "pbcopy")))
+	      (process-send-string proc text)
+	      (process-send-eof proc))))
+
+	(setq interprogram-cut-function 'paste-to-osx)
+	(setq interprogram-paste-function 'copy-from-osx))))
   )
+
 
 (defun ben-setup-misc ()
   (smart-cursor-color-mode +1)
@@ -417,7 +434,7 @@
   "Configure individual packages"
   (exec-path-from-shell-initialize)
   (ben-setup-yas-config)
-  (ben-setup-wl-clipboard)
+  (ben-setup-clipboard)
   (ben-setup-projectile)
   (ben-lsp-common-config)
   (ben-javascript-config)
