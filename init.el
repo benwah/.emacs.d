@@ -55,7 +55,7 @@
   (straight-use-package 'web-mode)
   ;; (straight-use-package 'cython-mode)
   ;; (straight-use-package 'inf-ruby)
-  ;; (straight-use-package 'ruby-mode)
+  (straight-use-package 'ruby-mode)
   ;; (straight-use-package 'flymake-ruby)
   ;; (straight-use-package 'robe-mode)
   (straight-use-package 'srcery-theme)
@@ -70,6 +70,7 @@
   (straight-use-package 'dap-mode)
   (straight-use-package 'lsp-jedi)
   (straight-use-package 'pyvenv)
+  (straight-use-package 'vterm)
   )
 
 ;; Init UI and features
@@ -93,6 +94,8 @@
   (column-number-mode 1)              ; Display column number
   (tool-bar-mode -1)                  ; No toolbar
   (scroll-bar-mode -1)
+  (global-linum-mode 1)
+
   (setq-default
    smerge-command-prefix (kbd "C-c v")
    js2-basic-offset 2
@@ -116,12 +119,11 @@
    version-control t                                       ; use versioned backups
    explicit-shell-file-name "/bin/bash")
 
-  (global-company-mode)
-
   ;; Theme
   (load-theme 'srcery t)
+  (set-frame-font "Hack Nerd Font Mono" nil t)
   (set-frame-parameter nil 'alpha-background 90)
-  (set-face-attribute 'default (selected-frame) :height 90)
+  (set-face-attribute 'default (selected-frame) :height 120)
   )
 
 
@@ -143,7 +145,12 @@
   (global-set-key (kbd "C-M-k") 'windmove-up)
   (global-set-key (kbd "C-M-j") 'windmove-down)
   (global-set-key (kbd "C-x g") 'magit-status)
-  (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup))
+  (global-set-key (kbd "C-x M-g") 'magit-dispatch-popup)
+  (global-set-key (kbd "C-c t q") (lambda () (interactive) (dap-delete-all-sessions)))
+  (global-set-key (kbd "C-c t c") (lambda () (interactive) (dap-continue (dap--cur-active-session-or-die) (dap--debug-session-thread-id (dap--cur-active-session-or-die)))))
+  (global-set-key (kbd "C-S-s") (lambda () (interactive) (dap-step-in (dap--cur-active-session-or-die))))
+  (global-set-key (kbd "C-S-n") (lambda () (interactive) (dap-next (dap--cur-active-session-or-die)))))
+
 
 ;; Per package configurations
 ;; --------------------------
@@ -189,10 +196,16 @@
   (setq lsp-ui-peek-enable t)
   (setq lsp-ui-peek-show-directory t)
   (setq lsp-ui-imenu-auto-refresh t)
+  (setq dap-output-window-min-height 20)
+  (setq dap-output-window-max-height 30)
 )
 
 (defun ben-setup-yas-config ()
   (yas-global-mode)
+  )
+
+(defun ben-configure-dap ()
+  (setq dap-auto-configure-features '(locals breakpoints tooltip repl))
   )
 
 (defun ben-python-config ()
@@ -258,6 +271,7 @@
     ;; Settings
     (set-fill-column 88)
     (auto-fill-mode 89)
+    (company-mode)
     (setq tab-width 4)
 
     ;; Modes
@@ -273,20 +287,21 @@
     (local-set-key (kbd "C-c t t") (lambda () (interactive) (dap-debug (dap-python--template "pytest-this-test"))))
     (local-set-key (kbd "C-c t f") (lambda () (interactive) (dap-debug (dap-python--template "Python :: Run pytest (buffer)"))))
     (local-set-key (kbd "C-c t a") (lambda () (interactive) (dap-debug (dap-python--template "pytest-all"))))
-    (local-set-key (kbd "C-c t b") (lambda () (interactive) (dap-breakpoint-toggle))))
+    (local-set-key (kbd "C-c t b") (lambda () (interactive) (dap-breakpoint-toggle)))
+)
 
   (defun ben-setup-lsp ()
     (add-hook 'python-mode-hook #'lsp)
     (dap-register-debug-template "pytest-this-test"
 				 (list :type "python-test-at-point"
-                                       :args ""
+                                       :args "-vv --disable-warnings"
                                        :program nil
                                        :module "pytest"
                                        :request "launch"
                                        :name "pytest-this-test"))
     (dap-register-debug-template "pytest-all"
 				 (list :type "python"
-                                       :args ""
+                                       :args "-vv --disable-warnings"
                                        :program nil
 				       :cwd "${workspaceFolder}"
 				       :target-module ""
@@ -300,7 +315,7 @@
   (add-hook 'python-mode-hook 'ben-python-hook)
   (add-hook 'window-configuration-change-hook 'configure-python-paths)
   (add-hook 'projectile-after-switch-project-hook 'configure-python-paths)
-  (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra)))
+  ;; (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-ui-)))
   )
 
 (defun ben-go-config ()
@@ -348,27 +363,25 @@
 
 
 (defun ben-ruby-config ()
-  (setq
-   robe-ruby-path (expand-file-name "~/.emacs.d/straight/repos/robe/lib")
-   ruby-indent-tabs-mode nil
-   ruby-insert-encoding-magic-comment nil
-   ruby-insert-encoding-magic-comment nil
-   ruby-deep-indent-paren nil
-   flycheck-checker-error-threshold 800)
-
   (add-to-list 'auto-mode-alist
                '("\\.\\(?:gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'" . ruby-mode))
   (add-to-list 'auto-mode-alist
                '("\\(Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'" . ruby-mode))
+  (add-to-list 'lsp-enabled-clients 'ruby-ls)
+  (setq lsp-solargraph-use-bundler t)
+  (setq lsp-solargraph-definitions t)
+  (add-hook 'ruby-mode-hook #'lsp)
   (add-hook 'ruby-mode-hook
             (lambda()
               (setq-default indent-tabs-mode nil)
-              (flycheck-mode)
-              (flymake-ruby-load)
+              ;; (flycheck-mode)
+              ;; (flymake-ruby-load)
+              ;; (robe-mode)
+	      (lsp-mode)
               (hs-minor-mode)
               (whitespace-mode)
               (set-fill-column 120)
-              (robe-mode))))
+	      )))
 
 
 (defun ben-setup-flycheck ()
@@ -408,21 +421,29 @@
   )
 
 
+(defun reinstate-windmove-keys ()
+  (local-set-key (kbd "C-M-h") 'windmove-left)
+  (local-set-key (kbd "C-M-l") 'windmove-right)
+  (local-set-key (kbd "C-M-k") 'windmove-up)
+  (local-set-key (kbd "C-M-j") 'windmove-down))
+
 (defun ben-setup-misc ()
+  (setq helm-ag-base-command "/opt/homebrew/bin/ag --nocolor --nogroup")
   (smart-cursor-color-mode +1)
+
 
   (add-hook 'css-mode-hook
             (lambda()
 	      (rainbow-mode 1)
 	      (set-fill-column 120)))
 
-  (add-hook 'comint-mode-hook
-            (function (lambda () 
-		      (local-set-key (kbd "C-M-h") 'windmove-left)
-		      (local-set-key (kbd "C-M-l") 'windmove-right)
-		      (local-set-key (kbd "C-M-k") 'windmove-up)
-		      (local-set-key (kbd "C-M-j") 'windmove-down)))))
+  (add-hook 'comint-mode-hook 'reinstate-windmove-keys))
 
+
+(defun ben-vterm-config ()
+  (setq vterm-shell "/bin/bash")
+  (add-hook 'vterm-mode-hook 'reinstate-windmove-keys)
+)
 
 (defun ben-setup-custom-functions ()
   (defun close-all-buffers ()
@@ -437,11 +458,13 @@
   (ben-setup-clipboard)
   (ben-setup-projectile)
   (ben-lsp-common-config)
+  (ben-configure-dap)
   (ben-javascript-config)
   (ben-python-config)
   (ben-go-config)
   (ben-rust-config)
-  ;; (ben-ruby-config)
+  (ben-vterm-config)
+  (ben-ruby-config)
   ;; (ben-setup-flycheck)
   (ben-setup-misc)
   (ben-setup-custom-functions)
