@@ -36,6 +36,10 @@
   (straight-use-package 'projectile)
   (straight-use-package 'helm-projectile)
   (straight-use-package 'auto-virtualenv)
+  (straight-use-package 'editorconfig)
+  (straight-use-package 'jsonrpc)
+  (straight-use-package
+   '(el-patch :type git :host github :repo "copilot-emacs/copilot.el"))
 
   ;; Go
   (straight-use-package 'go-mode)
@@ -95,6 +99,7 @@
   (tool-bar-mode -1)                  ; No toolbar
   (scroll-bar-mode -1)
   (global-linum-mode 1)
+  (add-to-list 'image-types 'svg)     ; ?
 
   (setq-default
    smerge-command-prefix (kbd "C-c v")
@@ -170,6 +175,14 @@
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map))
 
 
+(defun ben-copilot ()
+  (add-to-list 'load-path "/path/to/copilot.el")
+  (require 'copilot)
+  (add-hook 'prog-mode-hook 'copilot-mode)
+  (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+  (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+)
+
 (defun ben-javascript-config ()
   (setq web-mode-markup-indent-offset 2)
   (setq lsp-enable-indentation nil)
@@ -198,6 +211,7 @@
   (setq lsp-ui-imenu-auto-refresh t)
   (setq dap-output-window-min-height 20)
   (setq dap-output-window-max-height 30)
+  (setq lsp-ui-sideline-diagnostic-max-lines 5)
 )
 
 (defun ben-setup-yas-config ()
@@ -459,6 +473,7 @@
   (ben-setup-projectile)
   (ben-lsp-common-config)
   (ben-configure-dap)
+  (ben-copilot)
   (ben-javascript-config)
   (ben-python-config)
   (ben-go-config)
@@ -479,3 +494,4 @@
 
 (add-hook 'after-init-hook 'main)
 (put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
