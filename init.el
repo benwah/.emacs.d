@@ -98,7 +98,7 @@
   (column-number-mode 1)              ; Display column number
   (tool-bar-mode -1)                  ; No toolbar
   (scroll-bar-mode -1)
-  (global-linum-mode 1)
+  (global-display-line-numbers-mode 1)
   (add-to-list 'image-types 'svg)     ; ?
 
   (setq-default
